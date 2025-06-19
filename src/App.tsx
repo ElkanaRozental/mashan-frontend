@@ -10,6 +10,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import SoldiersPage from "./pages/SoldiersPage";
 import RequestsPage from "./pages/RequestsPage";
 import NewRequestPage from "./pages/NewRequestPage";
+import RequestDetailPage from "./pages/RequestDetailPage";
 import { useAppStore } from "./store/useAppStore";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => {
               <Route index element={<Navigate to="/soldiers" replace />} />
               <Route path="soldiers" element={<SoldiersPage />} />
               <Route path="requests" element={<RequestsPage />} />
+              <Route path="requests/:id" element={<RequestDetailPage />} />
               <Route path="new-request" element={<NewRequestPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/login" replace />} />

@@ -1,8 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Copy, MessageCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -13,6 +15,7 @@ interface MessagePreviewProps {
 
 const MessagePreview: React.FC<MessagePreviewProps> = ({ message, soldierPhone }) => {
   const { toast } = useToast();
+  const [customPhone, setCustomPhone] = useState(soldierPhone || '');
 
   const copyToClipboard = async () => {
     try {
@@ -31,17 +34,18 @@ const MessagePreview: React.FC<MessagePreviewProps> = ({ message, soldierPhone }
   };
 
   const sendWhatsApp = () => {
-    if (!soldierPhone) {
+    const phoneToUse = customPhone.trim();
+    if (!phoneToUse) {
       toast({
         title: "שגיאה",
-        description: "לא נמצא מספר טלפון לחייל",
+        description: "אנא הכנס מספר טלפון",
         variant: "destructive",
       });
       return;
     }
 
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${soldierPhone.replace(/\D/g, '')}?text=${encodedMessage}`;
+    const whatsappUrl = `https://wa.me/${phoneToUse.replace(/\D/g, '')}?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
   };
 
@@ -61,6 +65,18 @@ const MessagePreview: React.FC<MessagePreviewProps> = ({ message, soldierPhone }
           placeholder="ההודעה תופיע כאן לאחר מילוי הטופס..."
         />
         
+        <div className="space-y-2">
+          <Label htmlFor="whatsapp-phone">מספר טלפון לשליחה ב-WhatsApp</Label>
+          <Input
+            id="whatsapp-phone"
+            type="tel"
+            placeholder="05xxxxxxxx"
+            value={customPhone}
+            onChange={(e) => setCustomPhone(e.target.value)}
+            className="text-right"
+          />
+        </div>
+        
         <div className="flex gap-2">
           <Button
             variant="outline"
@@ -71,15 +87,14 @@ const MessagePreview: React.FC<MessagePreviewProps> = ({ message, soldierPhone }
             העתק ללוח
           </Button>
           
-          {soldierPhone && (
-            <Button
-              onClick={sendWhatsApp}
-              className="flex-1 bg-green-600 hover:bg-green-700"
-            >
-              <MessageCircle className="h-4 w-4 ml-2" />
-              שלח ב-WhatsApp
-            </Button>
-          )}
+          <Button
+            onClick={sendWhatsApp}
+            className="flex-1 bg-green-600 hover:bg-green-700"
+            disabled={!customPhone.trim()}
+          >
+            <MessageCircle className="h-4 w-4 ml-2" />
+            שלח ב-WhatsApp
+          </Button>
         </div>
       </CardContent>
     </Card>
