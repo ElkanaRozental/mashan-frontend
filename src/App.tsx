@@ -8,6 +8,8 @@ import LoginForm from "./components/LoginForm";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SoldiersPage from "./pages/SoldiersPage";
+import RequestsPage from "./pages/RequestsPage";
+import NewRequestPage from "./pages/NewRequestPage";
 import { useAppStore } from "./store/useAppStore";
 
 const queryClient = new QueryClient();
@@ -38,8 +40,8 @@ const App = () => {
             >
               <Route index element={<Navigate to="/soldiers" replace />} />
               <Route path="soldiers" element={<SoldiersPage />} />
-              <Route path="requests" element={<div className="text-center py-12">דף הבקשות - בפיתוח</div>} />
-              <Route path="new-request" element={<div className="text-center py-12">יצירת בקשה חדשה - בפיתוח</div>} />
+              <Route path="requests" element={<RequestsPage />} />
+              <Route path="new-request" element={<NewRequestPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
