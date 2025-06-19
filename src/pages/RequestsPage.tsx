@@ -15,7 +15,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { useToast } from '@/hooks/use-toast';
 
 const RequestsPage = () => {
-  const { requests, updateRequestStatus } = useAppStore();
+  const { submitting, updateRequestStatus } = useAppStore();
   const { toast } = useToast();
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -26,20 +26,20 @@ const RequestsPage = () => {
   // Get unique madars for filter
   const uniqueMadars = useMemo(() => {
     const madars = new Set<string>();
-    requests.forEach(request => {
+    submitting.forEach(request => {
       if ('soldier' in request) {
         madars.add(request.soldier.mador);
       }
-      if ('incomingSoldier' in request) {
-        madars.add(request.incomingSoldier.mador);
+      if ('outgoingSoldier' in request) {
+        madars.add(request.outgoingSoldier.mador);
       }
     });
     return Array.from(madars);
-  }, [requests]);
+  }, [submitting]);
 
   // Filter requests
   const filteredRequests = useMemo(() => {
-    return requests.filter(request => {
+    return submitting.filter(request => {
       // Status filter
       if (statusFilter !== 'all' && request.status !== statusFilter) {
         return false;
@@ -48,10 +48,10 @@ const RequestsPage = () => {
       // Mador filter
       if (madorFilter !== 'all') {
         let requestMador = '';
-        if ('soldier' in request) {
+        if (request.soldier) {
           requestMador = request.soldier.mador;
-        } else if ('incomingSoldier' in request) {
-          requestMador = request.incomingSoldier.mador;
+        } else if ('outgoingSoldier' in request) {
+          requestMador = request.outgoingSoldier.mador;
         }
         if (requestMador !== madorFilter) {
           return false;
@@ -62,10 +62,10 @@ const RequestsPage = () => {
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         let soldierName = '';
-        if ('soldier' in request) {
+        if (request.soldier) {
           soldierName = request.soldier.fullName.toLowerCase();
-        } else if ('incomingSoldier' in request) {
-          soldierName = request.incomingSoldier.fullName.toLowerCase();
+        } else if ('outgoingSoldier' in request) {
+          soldierName = request.outgoingSoldier.fullName.toLowerCase();
         }
         
         const baseName = 'baseName' in request ? request.baseName.toLowerCase() : '';
@@ -77,7 +77,7 @@ const RequestsPage = () => {
 
       return true;
     });
-  }, [requests, statusFilter, madorFilter, searchQuery]);
+  }, [submitting, statusFilter, madorFilter, searchQuery]);
 
   const getRequestTypeText = (type: Request['type']) => {
     switch (type) {
@@ -100,10 +100,10 @@ const RequestsPage = () => {
   };
 
   const getSoldierName = (request: Request) => {
-    if ('soldier' in request) {
+    if (request.soldier && 'outgoingSoldier' in request) {
+      return `${request.soldier.fullName} ← ${request.outgoingSoldier.fullName}`;
+    }  if (request.soldier) {
       return request.soldier.fullName;
-    } else if ('incomingSoldier' in request) {
-      return `${request.incomingSoldier.fullName} ← ${request.outgoingSoldier.fullName}`;
     }
     return '';
   };

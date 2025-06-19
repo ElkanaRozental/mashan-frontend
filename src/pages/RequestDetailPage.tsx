@@ -15,7 +15,7 @@ const RequestDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { requests, updateRequestStatus } = useAppStore();
+  const { submitting: requests, updateRequestStatus } = useAppStore();
   
   const request = requests.find(r => r.id === id);
   
@@ -54,10 +54,10 @@ const RequestDetailPage = () => {
   };
 
   const getSoldierName = (request: Request) => {
-    if ('soldier' in request) {
+    if ('outgoingSoldier' in request) {
+      return  `${request.soldier.fullName} ← ${request.outgoingSoldier.fullName}`;// 
+    } else if ('soldier' in request) {
       return request.soldier.fullName;
-    } else if ('incomingSoldier' in request) {
-      return `${request.incomingSoldier.fullName} ← ${request.outgoingSoldier.fullName}`;
     }
     return '';
   };
@@ -65,9 +65,7 @@ const RequestDetailPage = () => {
   const getSoldierPhone = (request: Request) => {
     if ('soldier' in request) {
       return request.soldier.phone;
-    } else if ('incomingSoldier' in request) {
-      return request.incomingSoldier.phone;
-    }
+    } 
     return '';
   };
 

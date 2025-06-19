@@ -1,7 +1,11 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Soldier, Request, AppState, User } from '../types';
+import { Soldier, Request, AppState, User, NewRequestDTO } from '../types';
+import { getallSoldiers, updateSoldier } from '../services/soldierService';
+import { getAllSubmitting, addRequest, updateRequest, updateRequestStatus } from '../services/requestService';
+
+
 
 // Mock users for authentication
 const MOCK_USERS: User[] = [
@@ -9,46 +13,6 @@ const MOCK_USERS: User[] = [
   { username: 'user2', password: '1234' }
 ];
 
-// Mock soldiers data
-const MOCK_SOLDIERS: Soldier[] = [
-  {
-    id: '1',
-    fullName: 'יונתן המלך',
-    militaryId: '1234567',
-    tz: '123456789',
-    phone: '0501234567',
-    gender: 'ז',
-    rank: 'אלוף',
-    serviceType: 'סדיר',
-    center: 'מרכז 1',
-    anaf: 'ענף מודיעין',
-    mador: 'מדור מחקר',
-    team: 'צוות א',
-    role: 'אנליסט',
-    requiresYarkonirApproval: true,
-    hasMAMGuard: false,
-    securityClearance: 'סודי',
-    allergies: 'אין'
-  },
-  {
-    id: '2',
-    fullName: 'יוסף המלך',
-    militaryId: '7654321',
-    tz: '987654321',
-    phone: '0507654321',
-    gender: 'ז',
-    rank: 'אלוף',
-    serviceType: 'סדיר',
-    center: 'מרכז 2',
-    anaf: 'ענף תקשוב',
-    mador: 'מדור פיתוח',
-    role: 'מפתח פול סטאק מוכשר',
-    requiresYarkonirApproval: false,
-    hasMAMGuard: true,
-    securityClearance: 'חסוי',
-    allergies: 'אין'
-  }
-];
 
 interface AppStore extends AppState {
   // Auth actions
@@ -56,15 +20,18 @@ interface AppStore extends AppState {
   logout: () => void;
   
   // Soldier actions
+  loadSoldiers: () => Promise<void>;
+
   addSoldier: (soldier: Omit<Soldier, 'id'>) => void;
-  updateSoldier: (id: string, soldier: Partial<Soldier>) => void;
+  updateSoldier: (id: string, soldier: Partial<Soldier>) => Promise<void>;
   deleteSoldier: (id: string) => void;
   getSoldierById: (id: string) => Soldier | undefined;
   searchSoldiers: (query: string) => Soldier[];
   
   // Request actions
-  addRequest: (request: Omit<Request, 'id' | 'createdAt' | 'createdBy'>) => void;
-  updateRequestStatus: (id: string, status: Request['status']) => void;
+  loadSubmitting: () => Promise<void>;
+  addRequest: (request:NewRequestDTO) => Promise<void>;
+  updateRequestStatus: (id: string, status: Request['status']) => Promise<void>;
   getRequestsByFilter: (filter: { status?: Request['status']; mador?: string; soldierName?: string }) => Request[];
   
   // UI actions
@@ -78,8 +45,8 @@ export const useAppStore = create<AppStore>()(
       // Initial state
       currentUser: null,
       isAuthenticated: false,
-      soldiers: MOCK_SOLDIERS,
-      requests: [],
+      soldiers: [],
+      submitting: [],
       isLoading: false,
       error: null,
 
@@ -97,6 +64,18 @@ export const useAppStore = create<AppStore>()(
       logout: () => {
         set({ currentUser: null, isAuthenticated: false });
       },
+      // Load initial data
+      loadSoldiers: async () => {
+        set({ isLoading: true });
+        try {
+          const data  = await getallSoldiers();
+          set({ soldiers: data });
+        } catch {
+          set({ error: 'שגיאה בטעינת חיילים מהשרת' });
+        } finally {
+          set({ isLoading: false });
+        }
+      },
 
       // Soldier actions
       addSoldier: (soldier) => {
@@ -109,12 +88,15 @@ export const useAppStore = create<AppStore>()(
         }));
       },
 
-      updateSoldier: (id, updates) => {
-        set(state => ({
-          soldiers: state.soldiers.map(soldier =>
-            soldier.id === id ? { ...soldier, ...updates } : soldier
-          )
-        }));
+      updateSoldier: async (id, updates) => {
+        try {
+          const data  = await updateSoldier(id, updates);
+          set(state => ({
+            soldiers: state.soldiers.map(s => (s.id === id ? data : s))
+          }));
+        } catch {
+          set({ error: 'שגיאה בעדכון חייל' });
+        }
       },
 
       deleteSoldier: (id) => {
@@ -140,7 +122,19 @@ export const useAppStore = create<AppStore>()(
       },
 
       // Request actions
-      addRequest: (request) => {
+      loadSubmitting: async () => {
+        set({ isLoading: true });
+        try {
+          const data  = await getAllSubmitting();
+          set({ submitting: data });
+        } catch {
+          set({ error: 'שגיאה בטעינת בקשות מהשרת' });
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      addRequest: async (request) => {
         const { currentUser } = get();
         const newRequest: Request = {
           ...request,
@@ -149,22 +143,30 @@ export const useAppStore = create<AppStore>()(
           createdBy: currentUser || 'unknown',
           status: 'ממתינה'
         } as Request;
-        
-        set(state => ({
-          requests: [...state.requests, newRequest]
-        }));
-      },
+        try {
+          const Request = await addRequest(newRequest); 
+          set(state => ({
+            submitting: [...state.submitting, Request]
+          }));
+        }catch (error) {
+          set({ error: 'שגיאה בהוספת בקשה' });
+        }},
 
-      updateRequestStatus: (id, status) => {
-        set(state => ({
-          requests: state.requests.map(request =>
-            request.id === id ? { ...request, status } : request
-          )
-        }));
+      updateRequestStatus:async (id, status) => {
+        try{
+          const  submitting: Request  = await updateRequestStatus(id,  status );
+          set(state => ({
+              submitting: state.submitting.map(request =>
+                request.id === id ? { ...submitting, status } : request
+              )
+            }));
+          } catch (error) {
+          set({ error: 'שגיאה בעדכון סטטוס הבקשה' });
+        }
       },
 
       getRequestsByFilter: (filter) => {
-        const { requests } = get();
+        const { submitting: requests } = get();
         return requests.filter(request => {
           if (filter.status && request.status !== filter.status) return false;
           if (filter.mador && 'soldier' in request && request.soldier.mador !== filter.mador) return false;
@@ -182,7 +184,7 @@ export const useAppStore = create<AppStore>()(
       name: 'military-app-store',
       partialize: (state) => ({
         soldiers: state.soldiers,
-        requests: state.requests,
+        requests: state.submitting,
         currentUser: state.currentUser,
         isAuthenticated: state.isAuthenticated
       })

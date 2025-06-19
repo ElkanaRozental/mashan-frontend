@@ -27,11 +27,11 @@ export interface BaseRequest {
   createdAt: Date; // תאריך יצירת הבקשה
   createdBy: string; // שם המשתמש שמילא את הבקשה
   status: RequestStatus; // סטטוס הבקשה
+  soldier: Soldier; // החייל שהגיש את הבקשה
 }
 
 export interface DayOnlyRequest extends BaseRequest {
   type: "dayOnly";
-  soldier: Soldier;
   arrivalDate: Date; // תאריך הגעה לבסיס
   baseName: string; // שם הבסיס
   requiresBaseApproval: boolean; // האם נדרש אישור
@@ -40,7 +40,6 @@ export interface DayOnlyRequest extends BaseRequest {
 
 export interface StayRequest extends BaseRequest {
   type: "stay";
-  soldier: Soldier;
   arrivalDate: Date;
   leaveDate: Date; // תאריך עזיבה
   baseName: string;
@@ -50,7 +49,6 @@ export interface StayRequest extends BaseRequest {
 
 export interface ReplacementRequest extends BaseRequest {
   type: "replacement";
-  incomingSoldier: Soldier; // החייל שנכנס
   outgoingSoldier: Soldier; // החייל שעוזב
   incomingArrivalDate: Date;
   incomingLeaveDate: Date;
@@ -60,9 +58,13 @@ export interface ReplacementRequest extends BaseRequest {
 
 export interface LeaveRequest extends BaseRequest {
   type: "leave";
-  soldier: Soldier;
   baseName: string;
 }
+export type NewRequestDTO =
+  | Omit<DayOnlyRequest, 'id' | 'createdAt' | 'createdBy' | 'status'>
+  | Omit<StayRequest, 'id' | 'createdAt' | 'createdBy' | 'status'>
+  | Omit<ReplacementRequest, 'id' | 'createdAt' | 'createdBy' | 'status'>
+  | Omit<LeaveRequest, 'id' | 'createdAt' | 'createdBy' | 'status'>;
 
 export type Request = DayOnlyRequest | StayRequest | ReplacementRequest | LeaveRequest;
 
@@ -78,7 +80,7 @@ export interface AppState {
   
   // Data
   soldiers: Soldier[];
-  requests: Request[];
+  submitting: Request[];
   
   // UI State
   isLoading: boolean;

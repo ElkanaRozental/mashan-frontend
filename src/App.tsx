@@ -12,11 +12,20 @@ import RequestsPage from "./pages/RequestsPage";
 import NewRequestPage from "./pages/NewRequestPage";
 import RequestDetailPage from "./pages/RequestDetailPage";
 import { useAppStore } from "./store/useAppStore";
+import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const { isAuthenticated } = useAppStore();
+  const loadSoldiers = useAppStore(state => state.loadSoldiers);
+  const loadRequests = useAppStore(state => state.loadSubmitting);
+
+  useEffect(() => {
+    loadSoldiers();
+    loadRequests();
+    console.log("Loading soldiers and submitting...");
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
