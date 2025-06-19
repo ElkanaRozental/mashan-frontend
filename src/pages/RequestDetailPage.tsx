@@ -143,7 +143,7 @@ const RequestDetailPage = () => {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div><strong>בסיס:</strong> {typedRequest.baseName}</div>
-            <div><strong>חייל נכנס:</strong> {typedRequest.incomingSoldier.fullName}</div>
+            <div><strong>חייל נכנס:</strong> {typedRequest.soldier.fullName}</div>
             <div><strong>חייל יוצא:</strong> {typedRequest.outgoingSoldier.fullName}</div>
             <div><strong>הגעת חייל נכנס:</strong> {format(typedRequest.incomingArrivalDate, 'dd/MM/yyyy')}</div>
             <div><strong>עזיבת חייל נכנס:</strong> {format(typedRequest.incomingLeaveDate, 'dd/MM/yyyy')}</div>
@@ -221,10 +221,10 @@ const RequestDetailPage = () => {
                 <div>
                   <h4 className="font-semibold mb-2">חייל נכנס</h4>
                   <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div><strong>שם:</strong> {(request as any).incomingSoldier.fullName}</div>
-                    <div><strong>מ.א.:</strong> {(request as any).incomingSoldier.militaryId}</div>
-                    <div><strong>טלפון:</strong> {(request as any).incomingSoldier.phone}</div>
-                    <div><strong>מדור:</strong> {(request as any).incomingSoldier.mador}</div>
+                    <div><strong>שם:</strong> {(request as any).soldier.fullName}</div>
+                    <div><strong>מ.א.:</strong> {(request as any).soldier.militaryId}</div>
+                    <div><strong>טלפון:</strong> {(request as any).soldier.phone}</div>
+                    <div><strong>מדור:</strong> {(request as any).soldier.mador}</div>
                   </div>
                 </div>
                 <div>

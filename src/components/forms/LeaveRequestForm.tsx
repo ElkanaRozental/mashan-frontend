@@ -12,6 +12,7 @@ import { useAppStore } from '@/store/useAppStore';
 import SoldierSearch from '@/components/SoldierSearch';
 import MessagePreview from '@/components/MessagePreview';
 import { useToast } from '@/hooks/use-toast';
+import SelectBase from '../ui/selectBase';
 
 const formSchema = z.object({
   baseName: z.string().min(1, "יש למלא שם בסיס"),
@@ -101,7 +102,7 @@ const LeaveRequestForm = () => {
                   <FormItem>
                     <FormLabel>שם הבסיס</FormLabel>
                     <FormControl>
-                      <Input placeholder="הכנס שם בסיס" {...field} />
+                      <SelectBase field={field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

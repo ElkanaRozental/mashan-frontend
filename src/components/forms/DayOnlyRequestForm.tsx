@@ -17,6 +17,14 @@ import { useAppStore } from '@/store/useAppStore';
 import SoldierSearch from '@/components/SoldierSearch';
 import MessagePreview from '@/components/MessagePreview';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import SelectBase from '../ui/selectBase';
 
 const formSchema = z.object({
   arrivalDate: z.date({
@@ -161,7 +169,20 @@ const DayOnlyRequestForm = () => {
                   <FormItem>
                     <FormLabel>שם הבסיס</FormLabel>
                     <FormControl>
-                      <Input placeholder="הכנס שם בסיס" {...field} />
+                      {/* <Input placeholder="הכנס שם בסיס" {...field} /> */}
+                      {/* <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="סדיר">סדיר</SelectItem>
+                      <SelectItem value="מילואים">מילואים</SelectItem>
+                      <SelectItem value="יועץ">יועץ</SelectItem>
+                    </SelectContent>
+                  </Select> */}
+                  <SelectBase field={field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

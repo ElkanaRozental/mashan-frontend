@@ -16,6 +16,7 @@ import { useAppStore } from '@/store/useAppStore';
 import SoldierSearch from '@/components/SoldierSearch';
 import MessagePreview from '@/components/MessagePreview';
 import { useToast } from '@/hooks/use-toast';
+import SelectBase from '../ui/selectBase';
 
 const formSchema = z.object({
   incomingArrivalDate: z.date({
@@ -36,7 +37,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 const ReplacementRequestForm = () => {
-  const [incomingSoldier, setIncomingSoldier] = useState<Soldier | null>(null);
+  const [soldier, setSoldier] = useState<Soldier | null>(null);
   const [outgoingSoldier, setOutgoingSoldier] = useState<Soldier | null>(null);
   const [generatedMessage, setGeneratedMessage] = useState<string>('');
   const { addRequest } = useAppStore();
@@ -47,17 +48,17 @@ const ReplacementRequestForm = () => {
   });
 
   const generateMessage = (data: FormData) => {
-    if (!incomingSoldier || !outgoingSoldier) return '';
+    if (!soldier || !outgoingSoldier) return '';
 
     const message = `בקשה להחלפת חיילים
 
 חייל נכנס:
-שם: ${incomingSoldier.fullName}
-מספר אישי: ${incomingSoldier.militaryId}
-דרגה: ${incomingSoldier.rank}
-מדור: ${incomingSoldier.mador}
-תפקיד: ${incomingSoldier.role}
-טלפון: ${incomingSoldier.phone}
+שם: ${soldier.fullName}
+מספר אישי: ${soldier.militaryId}
+דרגה: ${soldier.rank}
+מדור: ${soldier.mador}
+תפקיד: ${soldier.role}
+טלפון: ${soldier.phone}
 
 חייל עוזב:
 שם: ${outgoingSoldier.fullName}
@@ -78,7 +79,7 @@ const ReplacementRequestForm = () => {
   };
 
   const onSubmit = (data: FormData) => {
-    if (!incomingSoldier || !outgoingSoldier) {
+    if (!soldier || !outgoingSoldier) {
       toast({
         title: "שגיאה",
         description: "יש לבחור שני חיילים",
@@ -91,7 +92,7 @@ const ReplacementRequestForm = () => {
     
     addRequest({
       type: 'replacement',
-      incomingSoldier,
+      soldier,
       outgoingSoldier,
       incomingArrivalDate: data.incomingArrivalDate,
       incomingLeaveDate: data.incomingLeaveDate,
@@ -106,7 +107,7 @@ const ReplacementRequestForm = () => {
 
     // Reset form
     form.reset();
-    setIncomingSoldier(null);
+    setSoldier(null);
     setOutgoingSoldier(null);
     setGeneratedMessage('');
   };
@@ -117,8 +118,8 @@ const ReplacementRequestForm = () => {
         <div>
           <h3 className="text-lg font-semibold mb-4">חייל נכנס</h3>
           <SoldierSearch
-            onSelectSoldier={setIncomingSoldier}
-            selectedSoldier={incomingSoldier}
+            onSelectSoldier={setSoldier}
+            selectedSoldier={soldier}
             placeholder="בחר חייל נכנס..."
           />
         </div>
@@ -271,7 +272,7 @@ const ReplacementRequestForm = () => {
                   <FormItem>
                     <FormLabel>שם הבסיס</FormLabel>
                     <FormControl>
-                      <Input placeholder="הכנס שם בסיס" {...field} />
+                      <SelectBase field={field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -286,7 +287,7 @@ const ReplacementRequestForm = () => {
               variant="outline"
               onClick={() => {
                 const data = form.getValues();
-                if (incomingSoldier && outgoingSoldier && data.incomingArrivalDate && data.incomingLeaveDate && data.outgoingLeaveDate && data.baseName) {
+                if (soldier && outgoingSoldier && data.incomingArrivalDate && data.incomingLeaveDate && data.outgoingLeaveDate && data.baseName) {
                   generateMessage(data);
                 } else {
                   toast({
@@ -312,7 +313,7 @@ const ReplacementRequestForm = () => {
       {generatedMessage && (
         <MessagePreview
           message={generatedMessage}
-          soldierPhone={incomingSoldier?.phone}
+          soldierPhone={soldier?.phone}
         />
       )}
     </div>

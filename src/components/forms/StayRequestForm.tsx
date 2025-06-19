@@ -17,6 +17,7 @@ import { useAppStore } from '@/store/useAppStore';
 import SoldierSearch from '@/components/SoldierSearch';
 import MessagePreview from '@/components/MessagePreview';
 import { useToast } from '@/hooks/use-toast';
+import SelectBase from '../ui/selectBase';
 
 const formSchema = z.object({
   arrivalDate: z.date({
@@ -216,7 +217,7 @@ const StayRequestForm = () => {
                   <FormItem>
                     <FormLabel>שם הבסיס</FormLabel>
                     <FormControl>
-                      <Input placeholder="הכנס שם בסיס" {...field} />
+                      <SelectBase field={field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
