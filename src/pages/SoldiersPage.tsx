@@ -22,11 +22,15 @@ import {
 } from '@/components/ui/dialog';
 import { useAppStore } from '../store/useAppStore';
 import { Soldier } from '../types';
+import SoldierForm from '../components/forms/SoldierForm';
 
 const SoldiersPage = () => {
   const { soldiers, searchSoldiers, deleteSoldier } = useAppStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredSoldiers, setFilteredSoldiers] = useState(soldiers);
+  const [selectedSoldier, setSelectedSoldier] = useState<Soldier | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   React.useEffect(() => {
     const results = searchSoldiers(searchQuery);
@@ -37,6 +41,11 @@ const SoldiersPage = () => {
     if (confirm('האם אתה בטוח שברצונך למחוק את החייל?')) {
       deleteSoldier(id);
     }
+  };
+
+  const handleEdit = (soldier: Soldier) => {
+    setSelectedSoldier(soldier);
+    setIsEditDialogOpen(true);
   };
 
   const getServiceTypeBadge = (serviceType: string) => {
@@ -52,10 +61,23 @@ const SoldiersPage = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-gray-900">ניהול חיילים</h1>
-        <Button className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="h-4 w-4 ml-2" />
-          הוסף חייל חדש
-        </Button>
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="h-4 w-4 ml-2" />
+              הוסף חייל חדש
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl" dir="rtl">
+            <DialogHeader>
+              <DialogTitle>הוסף חייל חדש</DialogTitle>
+              <DialogDescription>
+                מלא את פרטי החייל במערכת
+              </DialogDescription>
+            </DialogHeader>
+            <SoldierForm onClose={() => setIsAddDialogOpen(false)} />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Search */}
@@ -141,7 +163,11 @@ const SoldiersPage = () => {
                       </DialogContent>
                     </Dialog>
                     
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleEdit(soldier)}
+                    >
                       <Edit className="h-4 w-4" />
                     </Button>
                     
@@ -169,6 +195,27 @@ const SoldiersPage = () => {
           </TableBody>
         </Table>
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-4xl" dir="rtl">
+          <DialogHeader>
+            <DialogTitle>עריכת פרטי חייל</DialogTitle>
+            <DialogDescription>
+              עדכן את פרטי {selectedSoldier?.fullName}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedSoldier && (
+            <SoldierForm 
+              soldier={selectedSoldier} 
+              onClose={() => {
+                setIsEditDialogOpen(false);
+                setSelectedSoldier(null);
+              }} 
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
