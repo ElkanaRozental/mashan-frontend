@@ -31,7 +31,7 @@ const RequestsPage = () => {
         madars.add(request.soldier.mador);
       }
       if ('outgoingSoldier' in request) {
-        madars.add(request.outgoingSoldier.mador);
+        madars.add(request.leavingSoldier.mador);
       }
     });
     return Array.from(madars);
@@ -41,7 +41,7 @@ const RequestsPage = () => {
   const filteredRequests = useMemo(() => {
     return submitting.filter(request => {
       // Status filter
-      if (statusFilter !== 'all' && request.status !== statusFilter) {
+      if (statusFilter !== 'all' && request.isApproved !== statusFilter) {
         return false;
       }
 
@@ -51,7 +51,7 @@ const RequestsPage = () => {
         if (request.soldier) {
           requestMador = request.soldier.mador;
         } else if ('outgoingSoldier' in request) {
-          requestMador = request.outgoingSoldier.mador;
+          requestMador = request.leavingSoldier.mador;
         }
         if (requestMador !== madorFilter) {
           return false;
@@ -65,10 +65,10 @@ const RequestsPage = () => {
         if (request.soldier) {
           soldierName = request.soldier.fullName.toLowerCase();
         } else if ('outgoingSoldier' in request) {
-          soldierName = request.outgoingSoldier.fullName.toLowerCase();
+          soldierName = request.leavingSoldier.fullName.toLowerCase();
         }
         
-        const baseName = 'baseName' in request ? request.baseName.toLowerCase() : '';
+        const baseName = 'baseName' in request ? request.base.toLowerCase() : '';
         
         if (!soldierName.includes(query) && !baseName.includes(query)) {
           return false;
@@ -101,7 +101,7 @@ const RequestsPage = () => {
 
   const getSoldierName = (request: Request) => {
     if (request.soldier && 'outgoingSoldier' in request) {
-      return `${request.soldier.fullName} ← ${request.outgoingSoldier.fullName}`;
+      return `${request.soldier.fullName} ← ${request.leavingSoldier.fullName}`;
     }  if (request.soldier) {
       return request.soldier.fullName;
     }
@@ -121,7 +121,7 @@ const RequestsPage = () => {
     // For now, return a basic message
     const soldierName = getSoldierName(request);
     const type = getRequestTypeText(request.type);
-    return `בקשה: ${type}\nחייל: ${soldierName}\nתאריך יצירה: ${format(request.createdAt, 'dd/MM/yyyy')}`;
+    return `בקשה: ${type}\nחייל: ${soldierName}\nתאריך יצירה: ${format(request.createdRequestDate, 'dd/MM/yyyy')}`;
   };
 
   const copyMessage = async (request: Request) => {
@@ -212,9 +212,9 @@ const RequestsPage = () => {
                       {getRequestTypeText(request.type)}
                     </TableCell>
                     <TableCell>{getSoldierName(request)}</TableCell>
-                    <TableCell>{format(request.createdAt, 'dd/MM/yyyy HH:mm')}</TableCell>
-                    <TableCell>{request.createdBy}</TableCell>
-                    <TableCell>{getStatusBadge(request.status)}</TableCell>
+                    <TableCell>{format(request.createdRequestDate, 'dd/MM/yyyy HH:mm')}</TableCell>
+                    <TableCell>{request.submitter}</TableCell>
+                    <TableCell>{getStatusBadge(request.isApproved)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Button
@@ -248,13 +248,13 @@ const RequestsPage = () => {
                                   <strong>חייל:</strong> {getSoldierName(selectedRequest)}
                                 </div>
                                 <div>
-                                  <strong>סטטוס נוכחי:</strong> {getStatusBadge(selectedRequest.status)}
+                                  <strong>סטטוס נוכחי:</strong> {getStatusBadge(selectedRequest.isApproved)}
                                 </div>
                                 <div className="flex gap-2">
                                   <Button
                                     size="sm"
                                     onClick={() => updateStatus(selectedRequest.id, 'אושרה')}
-                                    disabled={selectedRequest.status === 'אושרה'}
+                                    disabled={selectedRequest.isApproved === 'אושרה'}
                                   >
                                     אשר
                                   </Button>
@@ -262,7 +262,7 @@ const RequestsPage = () => {
                                     size="sm"
                                     variant="destructive"
                                     onClick={() => updateStatus(selectedRequest.id, 'נדחתה')}
-                                    disabled={selectedRequest.status === 'נדחתה'}
+                                    disabled={selectedRequest.isApproved === 'נדחתה'}
                                   >
                                     דחה
                                   </Button>
@@ -270,7 +270,7 @@ const RequestsPage = () => {
                                     size="sm"
                                     variant="outline"
                                     onClick={() => updateStatus(selectedRequest.id, 'ממתינה')}
-                                    disabled={selectedRequest.status === 'ממתינה'}
+                                    disabled={selectedRequest.isApproved === 'ממתינה'}
                                   >
                                     החזר להמתנה
                                   </Button>

@@ -90,13 +90,12 @@ const StayRequestForm = () => {
     const message = generateMessage(data);
     
     addRequest({
-      type: 'stay',
-      soldier: selectedSoldier,
-      arrivalDate: data.arrivalDate,
-      leaveDate: data.leaveDate,
-      baseName: data.baseName,
-      requiresBaseApproval: data.requiresBaseApproval,
-      hasBeenAtBaseBefore: data.hasBeenAtBaseBefore,
+      submittingType: 'AccommodationForSeveralDays',
+      incomingSoldier: selectedSoldier,
+      arrivelDate: data.arrivalDate,
+      departureDate: data.leaveDate,
+      base: data.baseName,
+      isAlreadyWasInBase: data.hasBeenAtBaseBefore,
     });
 
     toast({

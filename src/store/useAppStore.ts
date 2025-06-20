@@ -31,8 +31,8 @@ interface AppStore extends AppState {
   // Request actions
   loadSubmitting: () => Promise<void>;
   addRequest: (request:NewRequestDTO) => Promise<void>;
-  updateRequestStatus: (id: string, status: Request['status']) => Promise<void>;
-  getRequestsByFilter: (filter: { status?: Request['status']; mador?: string; soldierName?: string }) => Request[];
+  updateRequestStatus: (id: string, status: Request['isApproved']) => Promise<void>;
+  getRequestsByFilter: (filter: { status?: Request['isApproved']; mador?: string; soldierName?: string }) => Request[];
   
   // UI actions
   setLoading: (loading: boolean) => void;
@@ -138,10 +138,7 @@ export const useAppStore = create<AppStore>()(
         const { currentUser } = get();
         const newRequest: Request = {
           ...request,
-          id: Date.now().toString(),
-          createdAt: new Date(),
-          createdBy: currentUser || 'unknown',
-          status: 'ממתינה'
+          submitter: currentUser || 'unknown',
         } as Request;
         try {
           const Request = await addRequest(newRequest); 
@@ -157,7 +154,7 @@ export const useAppStore = create<AppStore>()(
           const  submitting: Request  = await updateRequestStatus(id,  status );
           set(state => ({
               submitting: state.submitting.map(request =>
-                request.id === id ? { ...submitting, status } : request
+                request.id === id ? { ...submitting, isApproved: status } : request
               )
             }));
           } catch (error) {
@@ -165,13 +162,25 @@ export const useAppStore = create<AppStore>()(
         }
       },
 
-      getRequestsByFilter: (filter) => {
+      getRequestsByFilter: (filter: { status?: boolean; mador?: string; soldierName?: string }) => {
         const { submitting: requests } = get();
-        return requests.filter(request => {
-          if (filter.status && request.status !== filter.status) return false;
-          if (filter.mador && 'soldier' in request && request.soldier.mador !== filter.mador) return false;
-          if (filter.soldierName && 'soldier' in request && 
-              !request.soldier.fullName.toLowerCase().includes(filter.soldierName.toLowerCase())) return false;
+        return requests.filter((request) => {
+          if (filter.status !== undefined && request.isApproved !== filter.status) return false;
+      
+          // בדיקה אם מדובר בבקשה עם חייל נכנס או חייל יוצא
+          const soldier =
+            'incomingSoldier' in request ? request.incomingSoldier :
+            'leavingSoldier' in request ? request.leavingSoldier : null;
+      
+          if (filter.mador && soldier && soldier.mador !== filter.mador) return false;
+      
+          if (
+            filter.soldierName &&
+            soldier &&
+            !soldier.fullName.toLowerCase().includes(filter.soldierName.toLowerCase())
+          )
+            return false;
+      
           return true;
         });
       },

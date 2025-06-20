@@ -19,54 +19,57 @@ export interface Soldier {
   securityClearance: string; // סיווג בטחוני
   allergies: string; // האם יש אלרגיה
 }
+export type SubmittingTypes = "OneDayWithoutAccommodation" | "AccommodationForSeveralDays" | "AccommodationAndExchangeSoldiers" | "BaseLeaving";
 
-export type RequestStatus = "ממתינה" | "אושרה" | "נדחתה";
+
 
 export interface BaseRequest {
   id: string;
-  createdAt: Date; // תאריך יצירת הבקשה
-  createdBy: string; // שם המשתמש שמילא את הבקשה
-  status: RequestStatus; // סטטוס הבקשה
-  soldier: Soldier; // החייל שהגיש את הבקשה
+  createdRequestDate: Date; // תאריך יצירת הבקשה
+  submitter: string; // שם המשתמש שמילא את הבקשה
+  isApproved: Boolean; // סטטוס הבקשה
+  submittingType : SubmittingTypes;
 }
 
 export interface DayOnlyRequest extends BaseRequest {
-  type: "dayOnly";
-  arrivalDate: Date; // תאריך הגעה לבסיס
-  baseName: string; // שם הבסיס
-  requiresBaseApproval: boolean; // האם נדרש אישור
-  hasBeenAtBaseBefore: boolean; // האם היה בבסיס בעבר
+  incomingSoldier: Soldier; // החייל שמגיע לבסיס
+  arrivelDate: Date; // תאריך הגעה לבסיס
+  base: string; // שם הבסיס
+  isAlreadyWasInBase: boolean; // האם היה בבסיס בעבר
 }
 
-export interface StayRequest extends BaseRequest {
-  type: "stay";
-  arrivalDate: Date;
-  leaveDate: Date; // תאריך עזיבה
-  baseName: string;
-  requiresBaseApproval: boolean;
-  hasBeenAtBaseBefore: boolean;
+
+export interface AccommodationForSeveralDaysSubmitting extends BaseRequest {
+  incomingSoldier: Soldier; // החייל שמגיע לבסיס
+  arrivelDate: Date;
+  departureDate: Date; // תאריך עזיבה
+  base: string;
+  isAlreadyWasInBase: boolean;
 }
 
-export interface ReplacementRequest extends BaseRequest {
-  type: "replacement";
-  outgoingSoldier: Soldier; // החייל שעוזב
-  incomingArrivalDate: Date;
-  incomingLeaveDate: Date;
-  outgoingLeaveDate: Date;
-  baseName: string;
+
+
+export interface AccommodationAndExchangeSoldiersSubmitting  extends BaseRequest {
+  leavingSoldier: Soldier; // החייל שעוזב
+  incomingSoldier: Soldier; // החייל שמגיע לבסיס
+  arrivelDate: Date;
+  departureDate: Date;
+  leavingSoldierExitDate: Date;
+  base: string;
 }
 
-export interface LeaveRequest extends BaseRequest {
-  type: "leave";
-  baseName: string;
+export interface BaseLeavingSubmitting  extends BaseRequest {
+  leavingSoldier: Soldier; // החייל שעוזב
+  exitDate: Date; // תאריך עזיבה
+  base: string;
 }
 export type NewRequestDTO =
   | Omit<DayOnlyRequest, 'id' | 'createdAt' | 'createdBy' | 'status'>
-  | Omit<StayRequest, 'id' | 'createdAt' | 'createdBy' | 'status'>
-  | Omit<ReplacementRequest, 'id' | 'createdAt' | 'createdBy' | 'status'>
-  | Omit<LeaveRequest, 'id' | 'createdAt' | 'createdBy' | 'status'>;
+  | Omit<AccommodationForSeveralDaysSubmitting, 'id' | 'createdAt' | 'createdBy' | 'status'>
+  | Omit<AccommodationAndExchangeSoldiersSubmitting , 'id' | 'createdAt' | 'createdBy' | 'status'>
+  | Omit<BaseLeavingSubmitting , 'id' | 'createdAt' | 'createdBy' | 'status'>;
 
-export type Request = DayOnlyRequest | StayRequest | ReplacementRequest | LeaveRequest;
+export type Request = DayOnlyRequest | AccommodationForSeveralDaysSubmitting | AccommodationAndExchangeSoldiersSubmitting  | BaseLeavingSubmitting ;
 
 export interface User {
   username: string;

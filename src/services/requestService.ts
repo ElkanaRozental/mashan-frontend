@@ -1,6 +1,6 @@
 //פניה לשרת 
 
-import { Request, RequestStatus} from "@/types";
+import { Request } from "@/types";
 
 const API_BASE_URL = 'http://localhost:3000/api'; // Update with your actual API base URL
 
@@ -18,7 +18,7 @@ export const getAllSubmitting = async ():Promise<Request[]> => {
   }
 }
 
-export const addRequest = async (request: Omit<Request, 'id' | 'createdAt' | 'createdBy'>): Promise<Request> => {
+export const addRequest = async (request: Omit<Request, 'id' | 'createdRequestDate' | 'isApproved'>): Promise<Request> => {
   try {
     const response = await fetch(`${API_BASE_URL}/submitting`, {
       method: 'POST',
@@ -74,7 +74,7 @@ export const deleteRequest = async (id: string): Promise<void> => {
     throw error;
   }
 }
-export const updateRequestStatus = async (id: string, status: RequestStatus): Promise<Request> => {
+export const updateRequestStatus = async (id: string, status: Boolean): Promise<Request> => {
     try {
         const response = await fetch(`${API_BASE_URL}/submitting/${id}/status`, {
         method: 'PUT',

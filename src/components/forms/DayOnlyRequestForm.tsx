@@ -87,12 +87,11 @@ const DayOnlyRequestForm = () => {
     const message = generateMessage(data);
     
     addRequest({
-      type: 'dayOnly',
-      soldier: selectedSoldier,
-      arrivalDate: data.arrivalDate,
-      baseName: data.baseName,
-      requiresBaseApproval: data.requiresBaseApproval,
-      hasBeenAtBaseBefore: data.hasBeenAtBaseBefore,
+      submittingType: 'OneDayWithoutAccommodation',
+      incomingSoldier: selectedSoldier,
+      arrivelDate: data.arrivalDate,
+      base: data.baseName,
+      isAlreadyWasInBase: data.hasBeenAtBaseBefore,
     });
 
     toast({

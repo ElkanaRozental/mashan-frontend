@@ -64,9 +64,10 @@ const LeaveRequestForm = () => {
     const message = generateMessage(data);
     
     addRequest({
-      type: 'leave',
-      soldier: selectedSoldier,
-      baseName: data.baseName,
+      submittingType: 'BaseLeaving',
+      leavingSoldier: selectedSoldier,
+      exitDate: new Date(), // Assuming current date for exit
+      base: data.baseName,
     });
 
     toast({

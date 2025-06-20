@@ -55,7 +55,7 @@ const RequestDetailPage = () => {
 
   const getSoldierName = (request: Request) => {
     if ('outgoingSoldier' in request) {
-      return  `${request.soldier.fullName} ← ${request.outgoingSoldier.fullName}`;// 
+      return  `${request.soldier.fullName} ← ${request.leavingSoldier.fullName}`;// 
     } else if ('soldier' in request) {
       return request.soldier.fullName;
     }
@@ -84,11 +84,11 @@ const RequestDetailPage = () => {
     
     let message = `🔸 ${type}\n`;
     message += `👤 חייל: ${soldierName}\n`;
-    message += `📅 תאריך יצירה: ${format(request.createdAt, 'dd/MM/yyyy')}\n`;
-    message += `📊 סטטוס: ${request.status}\n`;
+    message += `📅 תאריך יצירה: ${format(request.createdRequestDate, 'dd/MM/yyyy')}\n`;
+    message += `📊 סטטוס: ${request.isApproved}\n`;
     
     if ('baseName' in request) {
-      message += `🏢 בסיס: ${request.baseName}\n`;
+      message += `🏢 בסיס: ${request.base}\n`;
     }
     
     if ('arrivalDate' in request) {
@@ -96,7 +96,7 @@ const RequestDetailPage = () => {
     }
     
     if ('leaveDate' in request) {
-      message += `📅 תאריך עזיבה: ${format(request.leaveDate, 'dd/MM/yyyy')}\n`;
+      message += `📅 תאריך עזיבה: ${format(request.departureDate, 'dd/MM/yyyy')}\n`;
     }
     
     message += `\n🔗 לצפיה בפרטים המלאים: ${requestUrl}`;
@@ -199,9 +199,9 @@ const RequestDetailPage = () => {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div><strong>סוג בקשה:</strong> {getRequestTypeText(request.type)}</div>
-              <div><strong>סטטוס:</strong> {getStatusBadge(request.status)}</div>
-              <div><strong>תאריך יצירה:</strong> {format(request.createdAt, 'dd/MM/yyyy HH:mm')}</div>
-              <div><strong>נוצר על ידי:</strong> {request.createdBy}</div>
+              <div><strong>סטטוס:</strong> {getStatusBadge(request.isApproved)}</div>
+              <div><strong>תאריך יצירה:</strong> {format(request.createdRequestDate, 'dd/MM/yyyy HH:mm')}</div>
+              <div><strong>נוצר על ידי:</strong> {request.submitter}</div>
             </div>
             
             <hr className="my-4" />
@@ -216,7 +216,7 @@ const RequestDetailPage = () => {
             <CardTitle>פרטי החייל</CardTitle>
           </CardHeader>
           <CardContent>
-            {request.type === 'replacement' ? (
+            {request.submittingType === 'replacement' ? (
               <div className="space-y-4">
                 <div>
                   <h4 className="font-semibold mb-2">חייל נכנס</h4>
@@ -260,14 +260,14 @@ const RequestDetailPage = () => {
           <CardContent>
             <div className="space-y-4">
               <div>
-                <strong>סטטוס נוכחי:</strong> {getStatusBadge(request.status)}
+                <strong>סטטוס נוכחי:</strong> {getStatusBadge(request.isApproved)}
               </div>
               
               <div className="flex gap-2">
                 <Button
                   size="sm"
                   onClick={() => updateStatus('אושרה')}
-                  disabled={request.status === 'אושרה'}
+                  disabled={request.isApproved === true}
                   className="bg-green-600 hover:bg-green-700"
                 >
                   <CheckCircle className="h-4 w-4 ml-2" />
@@ -277,19 +277,10 @@ const RequestDetailPage = () => {
                   size="sm"
                   variant="destructive"
                   onClick={() => updateStatus('נדחתה')}
-                  disabled={request.status === 'נדחתה'}
+                  disabled={request.isApproved === false}
                 >
                   <XCircle className="h-4 w-4 ml-2" />
                   דחה
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => updateStatus('ממתינה')}
-                  disabled={request.status === 'ממתינה'}
-                >
-                  <Clock className="h-4 w-4 ml-2" />
-                  החזר להמתנה
                 </Button>
               </div>
             </div>
