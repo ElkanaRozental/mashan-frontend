@@ -31,7 +31,7 @@ interface AppStore extends AppState {
   // Request actions
   loadSubmitting: () => Promise<void>;
   addRequest: (request:NewRequestDTO) => Promise<void>;
-  updateRequestStatus: (id: string, status: Request['isApproved']) => Promise<void>;
+  updateRequestStatus: (id: string, status: Boolean) => Promise<void>;
   getRequestsByFilter: (filter: { status?: Request['isApproved']; mador?: string; soldierName?: string }) => Request[];
   
   // UI actions

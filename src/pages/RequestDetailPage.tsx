@@ -8,7 +8,7 @@ import { ArrowRight, Edit, Clock, CheckCircle, XCircle, Copy, MessageCircle } fr
 import { format } from 'date-fns';
 import { useAppStore } from '@/store/useAppStore';
 import { useToast } from '@/hooks/use-toast';
-import { Request, RequestStatus } from '@/types';
+import { Request } from '@/types';
 import MessagePreview from '@/components/MessagePreview';
 
 const RequestDetailPage = () => {
@@ -33,43 +33,55 @@ const RequestDetailPage = () => {
     );
   }
 
-  const getRequestTypeText = (type: Request['type']) => {
+  const getRequestTypeText = (type: Request['submittingType']) => {
     switch (type) {
-      case 'dayOnly': return 'הצטרפות חד-יומית';
-      case 'stay': return 'הצטרפות עם לינה';
-      case 'replacement': return 'החלפת חיילים';
-      case 'leave': return 'עזיבת בסיס';
+      case 'OneDayWithoutAccommodation': return 'הצטרפות חד-יומית';
+      case 'AccommodationForSeveralDays': return 'הצטרפות עם לינה';
+      case 'AccommodationAndExchangeSoldiers': return 'החלפת חיילים';
+      case 'BaseLeaving': return 'עזיבת בסיס';
     }
   };
 
-  const getStatusBadge = (status: RequestStatus) => {
-    switch (status) {
-      case 'ממתינה':
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800"><Clock className="h-3 w-3 ml-1" />{status}</Badge>;
-      case 'אושרה':
-        return <Badge variant="secondary" className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 ml-1" />{status}</Badge>;
-      case 'נדחתה':
-        return <Badge variant="secondary" className="bg-red-100 text-red-800"><XCircle className="h-3 w-3 ml-1" />{status}</Badge>;
+  const getStatusBadge = (status: Boolean) => {
+if (!status) {
+      return <Badge variant="secondary" className="bg-gray-100 text-gray-800">ממתין לאישור</Badge>;
     }
-  };
+     else{
+       return <Badge variant="secondary" className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 ml-1" />{"הבקשה אושרה"}</Badge>;
+     }
+    };
 
   const getSoldierName = (request: Request) => {
-    if ('outgoingSoldier' in request) {
-      return  `${request.soldier.fullName} ← ${request.leavingSoldier.fullName}`;// 
-    } else if ('soldier' in request) {
-      return request.soldier.fullName;
+  if ('incomingSoldier' in request && 'leavingSoldier' in request) {
+    // החלפת חיילים
+    return `${request.incomingSoldier.fullName} ← ${request.leavingSoldier.fullName}`;
+  } else if ('incomingSoldier' in request) {
+    // הצטרפות חד-יומית או עם לינה
+    return request.incomingSoldier.fullName;
+  } else if ('leavingSoldier' in request) {
+    // עזיבת בסיס
+    return request.leavingSoldier.fullName;
+  }
+  return '';
+};
+
+
+
+  const getSoldierPhone = (request: Request) => {
+    if ('incomingSoldier' in request && 'leavingSoldier' in request) {
+      // החלפת חיילים
+      return `${request.incomingSoldier.phone} / ${request.leavingSoldier.phone}`;
+    } else if ('incomingSoldier' in request) {
+      // הצטרפות חד-יומית או עם לינה
+      return request.incomingSoldier.phone;
+    } else if ('leavingSoldier' in request) {
+      // עזיבת בסיס
+      return request.leavingSoldier.phone;
     }
     return '';
   };
 
-  const getSoldierPhone = (request: Request) => {
-    if ('soldier' in request) {
-      return request.soldier.phone;
-    } 
-    return '';
-  };
-
-  const updateStatus = (newStatus: RequestStatus) => {
+  const updateStatus = (newStatus: Boolean) => {
     updateRequestStatus(request.id, newStatus);
     toast({
       title: "סטטוס עודכן",
@@ -79,7 +91,7 @@ const RequestDetailPage = () => {
 
   const generateRequestMessage = (request: Request) => {
     const soldierName = getSoldierName(request);
-    const type = getRequestTypeText(request.type);
+    const type = getRequestTypeText(request.submittingType);
     const requestUrl = `${window.location.origin}/requests/${request.id}`;
     
     let message = `🔸 ${type}\n`;
@@ -91,11 +103,11 @@ const RequestDetailPage = () => {
       message += `🏢 בסיס: ${request.base}\n`;
     }
     
-    if ('arrivalDate' in request) {
-      message += `📅 תאריך הגעה: ${format(request.arrivalDate, 'dd/MM/yyyy')}\n`;
+    if ('arrivelDate' in request) {
+      message += `📅 תאריך הגעה: ${format(request.arrivelDate, 'dd/MM/yyyy')}\n`;
     }
     
-    if ('leaveDate' in request) {
+    if ('departureDate' in request) {
       message += `📅 תאריך עזיבה: ${format(request.departureDate, 'dd/MM/yyyy')}\n`;
     }
     
@@ -122,13 +134,13 @@ const RequestDetailPage = () => {
   };
 
   const renderRequestDetails = () => {
-    if (request.type === 'dayOnly' || request.type === 'stay') {
+    if (request.submittingType === 'OneDayWithoutAccommodation' || request.submittingType === 'AccommodationForSeveralDays') {
       const typedRequest = request as any;
       return (
         <div className="grid grid-cols-2 gap-4">
           <div><strong>בסיס:</strong> {typedRequest.baseName}</div>
           <div><strong>תאריך הגעה:</strong> {format(typedRequest.arrivalDate, 'dd/MM/yyyy')}</div>
-          {request.type === 'stay' && (
+          {request.submittingType === 'AccommodationForSeveralDays' && (
             <div><strong>תאריך עזיבה:</strong> {format(typedRequest.leaveDate, 'dd/MM/yyyy')}</div>
           )}
           <div><strong>דרוש אישור בסיס:</strong> {typedRequest.requiresBaseApproval ? 'כן' : 'לא'}</div>
@@ -137,7 +149,7 @@ const RequestDetailPage = () => {
       );
     }
     
-    if (request.type === 'replacement') {
+    if (request.submittingType === 'AccommodationAndExchangeSoldiers') {
       const typedRequest = request as any;
       return (
         <div className="space-y-4">
@@ -153,7 +165,7 @@ const RequestDetailPage = () => {
       );
     }
     
-    if (request.type === 'leave') {
+    if (request.submittingType === 'BaseLeaving') {
       const typedRequest = request as any;
       return (
         <div className="grid grid-cols-2 gap-4">
@@ -174,7 +186,7 @@ const RequestDetailPage = () => {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">פרטי בקשה</h1>
-            <p className="text-gray-600">{getRequestTypeText(request.type)} - {getSoldierName(request)}</p>
+            <p className="text-gray-600">{getRequestTypeText(request.submittingType)} - {getSoldierName(request)}</p>
           </div>
           
           <div className="flex gap-2">
@@ -198,7 +210,7 @@ const RequestDetailPage = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div><strong>סוג בקשה:</strong> {getRequestTypeText(request.type)}</div>
+              <div><strong>סוג בקשה:</strong> {getRequestTypeText(request.submittingType)}</div>
               <div><strong>סטטוס:</strong> {getStatusBadge(request.isApproved)}</div>
               <div><strong>תאריך יצירה:</strong> {format(request.createdRequestDate, 'dd/MM/yyyy HH:mm')}</div>
               <div><strong>נוצר על ידי:</strong> {request.submitter}</div>
@@ -216,7 +228,7 @@ const RequestDetailPage = () => {
             <CardTitle>פרטי החייל</CardTitle>
           </CardHeader>
           <CardContent>
-            {request.submittingType === 'replacement' ? (
+            {request.submittingType === 'AccommodationAndExchangeSoldiers' ? (
               <div className="space-y-4">
                 <div>
                   <h4 className="font-semibold mb-2">חייל נכנס</h4>
@@ -266,7 +278,7 @@ const RequestDetailPage = () => {
               <div className="flex gap-2">
                 <Button
                   size="sm"
-                  onClick={() => updateStatus('אושרה')}
+                  onClick={() => updateStatus(true)}
                   disabled={request.isApproved === true}
                   className="bg-green-600 hover:bg-green-700"
                 >
@@ -276,7 +288,7 @@ const RequestDetailPage = () => {
                 <Button
                   size="sm"
                   variant="destructive"
-                  onClick={() => updateStatus('נדחתה')}
+                  onClick={() => updateStatus(false)}
                   disabled={request.isApproved === false}
                 >
                   <XCircle className="h-4 w-4 ml-2" />

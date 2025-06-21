@@ -1,4 +1,3 @@
-
 // Types for the military management system
 export interface Soldier {
   id: string;
@@ -31,7 +30,7 @@ export interface BaseRequest {
   submittingType : SubmittingTypes;
 }
 
-export interface DayOnlyRequest extends BaseRequest {
+export interface OneDayWithoutAccommodationSubmitting extends BaseRequest {
   incomingSoldier: Soldier; // החייל שמגיע לבסיס
   arrivelDate: Date; // תאריך הגעה לבסיס
   base: string; // שם הבסיס
@@ -64,12 +63,12 @@ export interface BaseLeavingSubmitting  extends BaseRequest {
   base: string;
 }
 export type NewRequestDTO =
-  | Omit<DayOnlyRequest, 'id' | 'createdAt' | 'createdBy' | 'status'>
-  | Omit<AccommodationForSeveralDaysSubmitting, 'id' | 'createdAt' | 'createdBy' | 'status'>
-  | Omit<AccommodationAndExchangeSoldiersSubmitting , 'id' | 'createdAt' | 'createdBy' | 'status'>
-  | Omit<BaseLeavingSubmitting , 'id' | 'createdAt' | 'createdBy' | 'status'>;
+  | Omit<OneDayWithoutAccommodationSubmitting, 'id' | 'createdRequestDate' | 'submitter' | 'isApproved'>
+  | Omit<AccommodationForSeveralDaysSubmitting, 'id' |  'createdRequestDate' | 'submitter' | 'isApproved'>
+  | Omit<AccommodationAndExchangeSoldiersSubmitting , 'id' |  'createdRequestDate' | 'submitter' | 'isApproved'>
+  | Omit<BaseLeavingSubmitting , 'id' |  'createdRequestDate' | 'submitter' | 'isApproved'>;
 
-export type Request = DayOnlyRequest | AccommodationForSeveralDaysSubmitting | AccommodationAndExchangeSoldiersSubmitting  | BaseLeavingSubmitting ;
+export type Request = OneDayWithoutAccommodationSubmitting | AccommodationForSeveralDaysSubmitting | AccommodationAndExchangeSoldiersSubmitting  | BaseLeavingSubmitting ;
 
 export interface User {
   username: string;

@@ -81,10 +81,10 @@ const RequestsPage = () => {
 
   const getRequestTypeText = (type: Request['type']) => {
     switch (type) {
-      case 'dayOnly': return 'הצטרפות חד-יומית';
-      case 'stay': return 'הצטרפות עם לינה';
-      case 'replacement': return 'החלפת חיילים';
-      case 'leave': return 'עזיבת בסיס';
+      case 'OneDayWithoutAccommodation': return 'הצטרפות חד-יומית';
+      case 'AccommodationForSeveralDays': return 'הצטרפות עם לינה';
+      case 'AccommodationAndExchangeSoldiers': return 'החלפת חיילים';
+      case 'BaseLeaving': return 'עזיבת בסיס';
     }
   };
 
@@ -120,7 +120,7 @@ const RequestsPage = () => {
     // This would generate the same message as in the forms
     // For now, return a basic message
     const soldierName = getSoldierName(request);
-    const type = getRequestTypeText(request.type);
+    const type = getRequestTypeText(request.submittingType);
     return `בקשה: ${type}\nחייל: ${soldierName}\nתאריך יצירה: ${format(request.createdRequestDate, 'dd/MM/yyyy')}`;
   };
 
@@ -209,7 +209,7 @@ const RequestsPage = () => {
                 {filteredRequests.map((request) => (
                   <TableRow key={request.id}>
                     <TableCell className="font-medium">
-                      {getRequestTypeText(request.type)}
+                      {getRequestTypeText(request.submittingType)}
                     </TableCell>
                     <TableCell>{getSoldierName(request)}</TableCell>
                     <TableCell>{format(request.createdRequestDate, 'dd/MM/yyyy HH:mm')}</TableCell>
@@ -242,7 +242,7 @@ const RequestsPage = () => {
                             {selectedRequest && (
                               <div className="space-y-4">
                                 <div>
-                                  <strong>סוג בקשה:</strong> {getRequestTypeText(selectedRequest.type)}
+                                  <strong>סוג בקשה:</strong> {getRequestTypeText(selectedrequest.submittingType)}
                                 </div>
                                 <div>
                                   <strong>חייל:</strong> {getSoldierName(selectedRequest)}
