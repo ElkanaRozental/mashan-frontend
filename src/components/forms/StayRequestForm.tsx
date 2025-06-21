@@ -57,10 +57,10 @@ const StayRequestForm = () => {
 
     const message = `בקשה להצטרפות עם לינה
 
-חייל: ${selectedSoldier.fullName}
-מספר אישי: ${selectedSoldier.militaryId}
+חייל: ${selectedSoldier.name}
+מספר אישי: ${selectedSoldier.privateNumber}
 דרגה: ${selectedSoldier.rank}
-מדור: ${selectedSoldier.mador}
+מדור: ${selectedSoldier.department}
 תפקיד: ${selectedSoldier.role}
 
 פרטי הבקשה:
@@ -71,7 +71,7 @@ const StayRequestForm = () => {
 נדרש אישור בסיס: ${data.requiresBaseApproval ? 'כן' : 'לא'}
 היה בבסיס בעבר: ${data.hasBeenAtBaseBefore ? 'כן' : 'לא'}
 
-טלפון ליצירת קשר: ${selectedSoldier.phone}`;
+טלפון ליצירת קשר: ${selectedSoldier.phoneNumber}`;
 
     setGeneratedMessage(message);
     return message;
@@ -92,8 +92,8 @@ const StayRequestForm = () => {
     addRequest({
       submittingType: 'AccommodationForSeveralDays',
       incomingSoldier: selectedSoldier,
-      arrivelDate: data.arrivalDate,
-      departureDate: data.leaveDate,
+      arrivelDate: data.arrivalDate.toISOString(),
+      departureDate: data.leaveDate.toISOString(),
       base: data.baseName,
       isAlreadyWasInBase: data.hasBeenAtBaseBefore,
     });
@@ -264,7 +264,7 @@ const StayRequestForm = () => {
           </div>
 
           <div className="flex gap-2">
-            <Button
+            {/* <Button
               type="button"
               variant="outline"
               onClick={() => {
@@ -282,7 +282,7 @@ const StayRequestForm = () => {
             >
               <Send className="h-4 w-4 ml-2" />
               צור הודעה
-            </Button>
+            </Button> */}
             
             <Button type="submit">
               <Save className="h-4 w-4 ml-2" />
@@ -295,7 +295,7 @@ const StayRequestForm = () => {
       {generatedMessage && (
         <MessagePreview
           message={generatedMessage}
-          soldierPhone={selectedSoldier?.phone}
+          soldierPhone={selectedSoldier?.phoneNumber}
         />
       )}
     </div>

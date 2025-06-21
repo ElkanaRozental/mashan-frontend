@@ -31,9 +31,9 @@ interface AppStore extends AppState {
   // Request actions
   loadSubmitting: () => Promise<void>;
   addRequest: (request:NewRequestDTO) => Promise<void>;
-  updateRequestStatus: (id: string, status: Boolean) => Promise<void>;
-  getRequestsByFilter: (filter: { status?: Request['isApproved']; mador?: string; soldierName?: string }) => Request[];
-  
+  updateRequestStatus: (id: string, status: boolean) => Promise<void>;
+  getRequestsByFilter: (filter: { status?: Request['isApproved']; mador?: number; soldierName?: string }) => Request[];
+
   // UI actions
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -115,9 +115,9 @@ export const useAppStore = create<AppStore>()(
         
         const lowerQuery = query.toLowerCase();
         return soldiers.filter(soldier =>
-          soldier.fullName.toLowerCase().includes(lowerQuery) ||
-          soldier.militaryId.includes(query) ||
-          soldier.tz.includes(query)
+          soldier.name.toLowerCase().includes(lowerQuery) ||
+          soldier.privateNumber.includes(query) ||
+          soldier.personalId.includes(query)
         );
       },
 
@@ -162,7 +162,7 @@ export const useAppStore = create<AppStore>()(
         }
       },
 
-      getRequestsByFilter: (filter: { status?: boolean; mador?: string; soldierName?: string }) => {
+      getRequestsByFilter: (filter: { status?: boolean; mador?: number; soldierName?: string }) => {
         const { submitting: requests } = get();
         return requests.filter((request) => {
           if (filter.status !== undefined && request.isApproved !== filter.status) return false;
@@ -172,12 +172,12 @@ export const useAppStore = create<AppStore>()(
             'incomingSoldier' in request ? request.incomingSoldier :
             'leavingSoldier' in request ? request.leavingSoldier : null;
       
-          if (filter.mador && soldier && soldier.mador !== filter.mador) return false;
+          if (filter.mador && soldier && soldier.department !== filter.mador) return false;
       
           if (
             filter.soldierName &&
             soldier &&
-            !soldier.fullName.toLowerCase().includes(filter.soldierName.toLowerCase())
+            !soldier.name.toLowerCase().includes(filter.soldierName.toLowerCase())
           )
             return false;
       

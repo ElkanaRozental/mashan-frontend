@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { FileText, Filter, MoreHorizontal, Copy, Eye, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
-import { Request, RequestStatus } from '@/types';
+import { Request } from '@/types';
 import { useAppStore } from '@/store/useAppStore';
 import { useToast } from '@/hooks/use-toast';
 
@@ -19,39 +19,39 @@ const RequestsPage = () => {
   const { toast } = useToast();
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<RequestStatus | 'all'>('all');
-  const [madorFilter, setMadorFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<'true' | 'false' | 'all'>('all');
+  const [madorFilter, setMadorFilter] = useState<number | 'all'>('all');
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
 
   // Get unique madars for filter
-  const uniqueMadars = useMemo(() => {
-    const madars = new Set<string>();
-    submitting.forEach(request => {
-      if ('soldier' in request) {
-        madars.add(request.soldier.mador);
-      }
-      if ('outgoingSoldier' in request) {
-        madars.add(request.leavingSoldier.mador);
-      }
-    });
-    return Array.from(madars);
-  }, [submitting]);
+const uniqueMadars = useMemo(() => {
+  const madars = new Set<number>();
+  submitting.forEach(request => {
+    if ('incomingSoldier' in request) {
+      madars.add(request.incomingSoldier.department);
+    }
+    if ('leavingSoldier' in request) {
+      madars.add(request.leavingSoldier.department);
+    }
+  });
+  return Array.from(madars);
+}, [submitting]);
 
   // Filter requests
   const filteredRequests = useMemo(() => {
     return submitting.filter(request => {
       // Status filter
-      if (statusFilter !== 'all' && request.isApproved !== statusFilter) {
+      if (statusFilter !== 'all' && request.isApproved.toString() !== statusFilter) {
         return false;
       }
 
       // Mador filter
       if (madorFilter !== 'all') {
-        let requestMador = '';
-        if (request.soldier) {
-          requestMador = request.soldier.mador;
-        } else if ('outgoingSoldier' in request) {
-          requestMador = request.leavingSoldier.mador;
+        let requestMador = 0;
+        if ('incomingSoldier' in request) {
+          requestMador = request.incomingSoldier.department;
+        } else if ('leavingSoldier' in request) {
+          requestMador = request.leavingSoldier.department;
         }
         if (requestMador !== madorFilter) {
           return false;
@@ -62,10 +62,10 @@ const RequestsPage = () => {
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         let soldierName = '';
-        if (request.soldier) {
-          soldierName = request.soldier.fullName.toLowerCase();
-        } else if ('outgoingSoldier' in request) {
-          soldierName = request.leavingSoldier.fullName.toLowerCase();
+          if ('incomingSoldier' in request) {
+          soldierName = request.incomingSoldier.name.toLowerCase();
+        } else if ('leavingSoldier' in request) {
+          soldierName = request.leavingSoldier.name.toLowerCase();
         }
         
         const baseName = 'baseName' in request ? request.base.toLowerCase() : '';
@@ -79,7 +79,7 @@ const RequestsPage = () => {
     });
   }, [submitting, statusFilter, madorFilter, searchQuery]);
 
-  const getRequestTypeText = (type: Request['type']) => {
+  const getRequestTypeText = (type: Request['submittingType']) => {
     switch (type) {
       case 'OneDayWithoutAccommodation': return 'הצטרפות חד-יומית';
       case 'AccommodationForSeveralDays': return 'הצטרפות עם לינה';
@@ -88,27 +88,28 @@ const RequestsPage = () => {
     }
   };
 
-  const getStatusBadge = (status: RequestStatus) => {
-    switch (status) {
-      case 'ממתינה':
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800"><Clock className="h-3 w-3 ml-1" />{status}</Badge>;
-      case 'אושרה':
-        return <Badge variant="secondary" className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 ml-1" />{status}</Badge>;
-      case 'נדחתה':
-        return <Badge variant="secondary" className="bg-red-100 text-red-800"><XCircle className="h-3 w-3 ml-1" />{status}</Badge>;
+  const getStatusBadge = (status: boolean) => {
+    if (status) {
+      return <Badge variant="secondary" className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 ml-1" />{"מאושר"}</Badge>;
+    }
+      else{
+        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800"><Clock className="h-3 w-3 ml-1" />{"ממתין לאישור"}</Badge>;
     }
   };
 
   const getSoldierName = (request: Request) => {
-    if (request.soldier && 'outgoingSoldier' in request) {
-      return `${request.soldier.fullName} ← ${request.leavingSoldier.fullName}`;
-    }  if (request.soldier) {
-      return request.soldier.fullName;
+    if ("incomingSoldier" in request && 'leavingSoldier' in request) {
+      return `${request.incomingSoldier.name} ← ${request.leavingSoldier.name}`;
+    } else if ('incomingSoldier' in request) {
+      return request.incomingSoldier.name;
+    }
+    else if ('leavingSoldier' in request) {
+      return request.leavingSoldier.name;
     }
     return '';
   };
 
-  const updateStatus = (requestId: string, newStatus: RequestStatus) => {
+  const updateStatus = (requestId: string, newStatus: boolean) => {
     updateRequestStatus(requestId, newStatus);
     toast({
       title: "סטטוס עודכן",
@@ -166,7 +167,7 @@ const RequestsPage = () => {
               />
             </div>
             
-            <Select value={statusFilter} onValueChange={(value: RequestStatus | 'all') => setStatusFilter(value)}>
+            <Select value={statusFilter.toString()} onValueChange={(value: 'true' | 'false' | 'all') => setStatusFilter(value)}>
               <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder="סטטוס" />
               </SelectTrigger>
@@ -178,14 +179,14 @@ const RequestsPage = () => {
               </SelectContent>
             </Select>
 
-            <Select value={madorFilter} onValueChange={setMadorFilter}>
+            <Select value={madorFilter.toString()} onValueChange={(value) => setMadorFilter(value === 'all' ? 'all' : Number(value))}>
               <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder="מדור" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">כל המדורים</SelectItem>
                 {uniqueMadars.map(mador => (
-                  <SelectItem key={mador} value={mador}>{mador}</SelectItem>
+                  <SelectItem key={mador} value={mador.toString()}>{mador}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -242,7 +243,7 @@ const RequestsPage = () => {
                             {selectedRequest && (
                               <div className="space-y-4">
                                 <div>
-                                  <strong>סוג בקשה:</strong> {getRequestTypeText(selectedrequest.submittingType)}
+                                  <strong>סוג בקשה:</strong> {getRequestTypeText(selectedRequest.submittingType)}
                                 </div>
                                 <div>
                                   <strong>חייל:</strong> {getSoldierName(selectedRequest)}
@@ -253,24 +254,16 @@ const RequestsPage = () => {
                                 <div className="flex gap-2">
                                   <Button
                                     size="sm"
-                                    onClick={() => updateStatus(selectedRequest.id, 'אושרה')}
-                                    disabled={selectedRequest.isApproved === 'אושרה'}
+                                    onClick={() => updateStatus(selectedRequest.id, true)}
+                                    disabled={selectedRequest.isApproved === true}
                                   >
                                     אשר
                                   </Button>
                                   <Button
                                     size="sm"
-                                    variant="destructive"
-                                    onClick={() => updateStatus(selectedRequest.id, 'נדחתה')}
-                                    disabled={selectedRequest.isApproved === 'נדחתה'}
-                                  >
-                                    דחה
-                                  </Button>
-                                  <Button
-                                    size="sm"
                                     variant="outline"
-                                    onClick={() => updateStatus(selectedRequest.id, 'ממתינה')}
-                                    disabled={selectedRequest.isApproved === 'ממתינה'}
+                                    onClick={() => updateStatus(selectedRequest.id, false)}
+                                    disabled={selectedRequest.isApproved === false}
                                   >
                                     החזר להמתנה
                                   </Button>

@@ -99,19 +99,19 @@ const SoldiersPage = () => {
         </div>
         <div className="bg-white p-6 rounded-lg shadow border">
           <div className="text-2xl font-bold text-green-600">
-            {soldiers.filter(s => s.serviceType === 'סדיר').length}
+            {soldiers.filter(s => s.jobKind === 'SADIR').length}
           </div>
           <div className="text-gray-600">שירות סדיר</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow border">
           <div className="text-2xl font-bold text-orange-600">
-            {soldiers.filter(s => s.serviceType === 'מילואים').length}
+            {soldiers.filter(s => s.jobKind === 'MILUIM').length}
           </div>
           <div className="text-gray-600">מילואים</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow border">
           <div className="text-2xl font-bold text-red-600">
-            {soldiers.filter(s => s.requiresYarkonirApproval).length}
+            {soldiers.filter(s => s.isRequiredYarkonirApporval).length}
           </div>
           <div className="text-gray-600">דורשים אישור ירקוניר</div>
         </div>
@@ -134,15 +134,15 @@ const SoldiersPage = () => {
           <TableBody>
             {filteredSoldiers.map((soldier) => (
               <TableRow key={soldier.id}>
-                <TableCell className="font-medium">{soldier.fullName}</TableCell>
-                <TableCell>{soldier.militaryId}</TableCell>
+                <TableCell className="font-medium">{soldier.name}</TableCell>
+                <TableCell>{soldier.privateNumber}</TableCell>
                 <TableCell>{soldier.rank}</TableCell>
                 <TableCell>
-                  <Badge variant={getServiceTypeBadge(soldier.serviceType)}>
-                    {soldier.serviceType}
+                  <Badge variant={getServiceTypeBadge(soldier.jobKind)}>
+                    {soldier.jobKind}
                   </Badge>
                 </TableCell>
-                <TableCell>{soldier.mador}</TableCell>
+                <TableCell>{soldier.department}</TableCell>
                 <TableCell>{soldier.role}</TableCell>
                 <TableCell>
                   <div className="flex space-x-reverse space-x-2">
@@ -156,7 +156,7 @@ const SoldiersPage = () => {
                         <DialogHeader>
                           <DialogTitle>פרטי החייל</DialogTitle>
                           <DialogDescription>
-                            מידע מלא על {soldier.fullName}
+                            מידע מלא על {soldier.name}
                           </DialogDescription>
                         </DialogHeader>
                         <SoldierDetails soldier={soldier} />
@@ -183,7 +183,7 @@ const SoldiersPage = () => {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => window.open(`tel:${soldier.phone}`)}
+                      onClick={() => window.open(`tel:${soldier.phoneNumber}`)}
                       className="text-green-600 hover:text-green-700"
                     >
                       <Phone className="h-4 w-4" />
@@ -202,7 +202,7 @@ const SoldiersPage = () => {
           <DialogHeader>
             <DialogTitle>עריכת פרטי חייל</DialogTitle>
             <DialogDescription>
-              עדכן את פרטי {selectedSoldier?.fullName}
+              עדכן את פרטי {selectedSoldier?.name}
             </DialogDescription>
           </DialogHeader>
           {selectedSoldier && (
@@ -223,21 +223,21 @@ const SoldiersPage = () => {
 const SoldierDetails: React.FC<{ soldier: Soldier }> = ({ soldier }) => {
   return (
     <div className="grid grid-cols-2 gap-4 text-sm">
-      <div><strong>שם מלא:</strong> {soldier.fullName}</div>
-      <div><strong>מ.א.:</strong> {soldier.militaryId}</div>
-      <div><strong>ת.ז.:</strong> {soldier.tz}</div>
-      <div><strong>טלפון:</strong> {soldier.phone}</div>
+      <div><strong>שם מלא:</strong> {soldier.name}</div>
+      <div><strong>מ.א.:</strong> {soldier.privateNumber}</div>
+      <div><strong>ת.ז.:</strong> {soldier.personalId}</div>
+      <div><strong>טלפון:</strong> {soldier.phoneNumber}</div>
       <div><strong>מגדר:</strong> {soldier.gender}</div>
       <div><strong>דרגה:</strong> {soldier.rank}</div>
-      <div><strong>סוג שירות:</strong> {soldier.serviceType}</div>
+      <div><strong>סוג שירות:</strong> {soldier.jobKind}</div>
       <div><strong>מרכז:</strong> {soldier.center}</div>
-      <div><strong>ענף:</strong> {soldier.anaf}</div>
-      <div><strong>מדור:</strong> {soldier.mador}</div>
+      <div><strong>ענף:</strong> {soldier.branch}</div>
+      <div><strong>מדור:</strong> {soldier.department}</div>
       <div><strong>צוות:</strong> {soldier.team || 'לא מוגדר'}</div>
       <div><strong>תפקיד:</strong> {soldier.role}</div>
-      <div><strong>אישור ירקוניר:</strong> {soldier.requiresYarkonirApproval ? 'נדרש' : 'לא נדרש'}</div>
-      <div><strong>משמר אמ"ן:</strong> {soldier.hasMAMGuard ? 'קיים' : 'לא קיים'}</div>
-      <div><strong>סיווג בטחוני:</strong> {soldier.securityClearance}</div>
+      <div><strong>אישור ירקוניר:</strong> {soldier.isRequiredYarkonirApporval ? 'נדרש' : 'לא נדרש'}</div>
+      <div><strong>משמר אמ"ן:</strong> {soldier.isExistsMishmarAman ? 'קיים' : 'לא קיים'}</div>
+      <div><strong>סיווג בטחוני:</strong> {soldier.clarance}</div>
       <div><strong>אלרגיות:</strong> {soldier.allergies}</div>
     </div>
   );

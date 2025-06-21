@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -53,20 +52,20 @@ const ReplacementRequestForm = () => {
     const message = `בקשה להחלפת חיילים
 
 חייל נכנס:
-שם: ${      incomingSoldier.fullName}
-מספר אישי: ${      incomingSoldier.militaryId}
+שם: ${      incomingSoldier.name}
+מספר אישי: ${      incomingSoldier.privateNumber}
 דרגה: ${      incomingSoldier.rank}
-מדור: ${      incomingSoldier.mador}
+מדור: ${      incomingSoldier.department}
 תפקיד: ${      incomingSoldier.role}
-טלפון: ${      incomingSoldier.phone}
+טלפון: ${      incomingSoldier.phoneNumber}
 
 חייל עוזב:
-שם: ${leavingSoldier.fullName}
-מספר אישי: ${leavingSoldier.militaryId}
+שם: ${leavingSoldier.name}
+מספר אישי: ${leavingSoldier.privateNumber}
 דרגה: ${leavingSoldier.rank}
-מדור: ${leavingSoldier.mador}
+מדור: ${leavingSoldier.department}
 תפקיד: ${leavingSoldier.role}
-טלפון: ${leavingSoldier.phone}
+טלפון: ${leavingSoldier.phoneNumber}
 
 לוח זמנים:
 החייל הנכנס יגיע: ${format(data.incomingArrivalDate, 'dd/MM/yyyy')}
@@ -93,9 +92,9 @@ const ReplacementRequestForm = () => {
       submittingType: 'AccommodationAndExchangeSoldiers',
       incomingSoldier,
       leavingSoldier,
-      arrivelDate: data.incomingArrivalDate,
-      departureDate: data.incomingLeaveDate,
-      leavingSoldierExitDate: data.outgoingLeaveDate,
+      arrivelDate: data.incomingArrivalDate.toISOString(),
+      departureDate: data.incomingLeaveDate.toISOString(),
+      leavingSoldierExitDate: data.outgoingLeaveDate.toISOString(),
       base: data.baseName,
     });
 
@@ -281,7 +280,7 @@ const ReplacementRequestForm = () => {
           </div>
 
           <div className="flex gap-2">
-            <Button
+            {/* <Button
               type="button"
               variant="outline"
               onClick={() => {
@@ -299,7 +298,7 @@ const ReplacementRequestForm = () => {
             >
               <Send className="h-4 w-4 ml-2" />
               צור הודעה
-            </Button>
+            </Button> */}
             
             <Button type="submit">
               <Save className="h-4 w-4 ml-2" />
@@ -312,7 +311,7 @@ const ReplacementRequestForm = () => {
       {generatedMessage && (
         <MessagePreview
           message={generatedMessage}
-          soldierPhone={      incomingSoldier?.phone}
+          soldierPhone={      incomingSoldier?.phoneNumber}
         />
       )}
     </div>

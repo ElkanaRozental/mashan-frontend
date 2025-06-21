@@ -58,8 +58,8 @@ const SoldierSearch: React.FC<SoldierSearchProps> = ({
           >
             {selectedSoldier ? (
               <div className="flex items-center">
-                <span className="font-medium">{selectedSoldier.fullName}</span>
-                <span className="text-gray-500 mr-2">({selectedSoldier.militaryId})</span>
+                <span className="font-medium">{selectedSoldier.name}</span>
+                <span className="text-gray-500 mr-2">({selectedSoldier.privateNumber})</span>
               </div>
             ) : (
               <span className="text-gray-500">{placeholder}</span>
@@ -81,14 +81,14 @@ const SoldierSearch: React.FC<SoldierSearchProps> = ({
                 {filteredSoldiers.map((soldier) => (
                   <CommandItem
                     key={soldier.id}
-                    value={`${soldier.fullName} ${soldier.militaryId}`}
+                    value={`${soldier.name} ${soldier.privateNumber}`}
                     onSelect={() => handleSelect(soldier)}
                     className="flex items-center justify-between"
                   >
                     <div className="flex flex-col">
-                      <span className="font-medium">{soldier.fullName}</span>
+                      <span className="font-medium">{soldier.name}</span>
                       <span className="text-sm text-gray-500">
-                        מ.א: {soldier.militaryId} | {soldier.rank} | {soldier.mador}
+                        מ.א: {soldier.privateNumber} | {soldier.rank} | {soldier.department}
                       </span>
                     </div>
                     <Check

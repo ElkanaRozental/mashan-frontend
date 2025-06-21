@@ -56,10 +56,10 @@ const DayOnlyRequestForm = () => {
 
     const message = `בקשה להצטרפות חד-יומית
 
-חייל: ${selectedSoldier.fullName}
-מספר אישי: ${selectedSoldier.militaryId}
+חייל: ${selectedSoldier.name}
+מספר אישי: ${selectedSoldier.privateNumber}
 דרגה: ${selectedSoldier.rank}
-מדור: ${selectedSoldier.mador}
+מדור: ${selectedSoldier.department}
 תפקיד: ${selectedSoldier.role}
 
 פרטי הבקשה:
@@ -68,7 +68,7 @@ const DayOnlyRequestForm = () => {
 נדרש אישור בסיס: ${data.requiresBaseApproval ? 'כן' : 'לא'}
 היה בבסיס בעבר: ${data.hasBeenAtBaseBefore ? 'כן' : 'לא'}
 
-טלפון ליצירת קשר: ${selectedSoldier.phone}`;
+טלפון ליצירת קשר: ${selectedSoldier.phoneNumber}`;
 
     setGeneratedMessage(message);
     return message;
@@ -89,7 +89,7 @@ const DayOnlyRequestForm = () => {
     addRequest({
       submittingType: 'OneDayWithoutAccommodation',
       incomingSoldier: selectedSoldier,
-      arrivelDate: data.arrivalDate,
+      arrivelDate: data.arrivalDate.toISOString(),
       base: data.baseName,
       isAlreadyWasInBase: data.hasBeenAtBaseBefore,
     });
@@ -168,19 +168,6 @@ const DayOnlyRequestForm = () => {
                   <FormItem>
                     <FormLabel>שם הבסיס</FormLabel>
                     <FormControl>
-                      {/* <Input placeholder="הכנס שם בסיס" {...field} /> */}
-                      {/* <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="סדיר">סדיר</SelectItem>
-                      <SelectItem value="מילואים">מילואים</SelectItem>
-                      <SelectItem value="יועץ">יועץ</SelectItem>
-                    </SelectContent>
-                  </Select> */}
                   <SelectBase field={field} />
                     </FormControl>
                     <FormMessage />
@@ -188,7 +175,6 @@ const DayOnlyRequestForm = () => {
                 )}
               />
             </div>
-
             <div className="space-y-4 mt-4">
               <FormField
                 control={form.control}
@@ -229,7 +215,7 @@ const DayOnlyRequestForm = () => {
           </div>
 
           <div className="flex gap-2">
-            <Button
+            {/* <Button
               type="button"
               variant="outline"
               onClick={() => {
@@ -247,7 +233,7 @@ const DayOnlyRequestForm = () => {
             >
               <Send className="h-4 w-4 ml-2" />
               צור הודעה
-            </Button>
+            </Button> */}
             
             <Button type="submit">
               <Save className="h-4 w-4 ml-2" />
@@ -260,7 +246,7 @@ const DayOnlyRequestForm = () => {
       {generatedMessage && (
         <MessagePreview
           message={generatedMessage}
-          soldierPhone={selectedSoldier?.phone}
+          soldierPhone={selectedSoldier?.phoneNumber}
         />
       )}
     </div>

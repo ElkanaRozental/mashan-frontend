@@ -1,22 +1,30 @@
 // Types for the military management system
 export interface Soldier {
   id: string;
-  fullName: string; // שם מלא של החייל
-  militaryId: string; // מספר אישי (מ.א.)
-  tz: string; // ת.ז.
-  phone: string; // מספר טלפון נייד
-  gender: "ז" | "נ"; // מגדר
+  name: string; // שם מלא של החייל
+  privateNumber: string; // מספר אישי (מ.א.)
+  personalId: string; // ת.ז.
+  phoneNumber: string; // מספר טלפון נייד
+  gender: 'MALE' | 'FEMALE'; // מגדר
   rank: string; // דרגת החייל
-  serviceType: "סדיר" | "מילואים" | "יועץ"; // סוג שירות
-  center: string; // מרכז
-  anaf: string; // ענף
-  mador: string; // מדור
-  team?: string; // צוות (אם קיים)
+
+  center: number; // מרכז
+  branch: number; // ענף
+  department: number; // מדור
+  team?: number; // צוות (אם קיים)
+  clarance: number; // סיווג בטחוני
+  
+  allergies: string; // האם יש אלרגיה 
+  jobKind: 'SADIR' | 'SAHATZ' | 'MILUIM' | 'YOETZ' | 'KEVA'; // סוג שירות,// SADIR - שירות סדיר, SAHATZ - שירות חוץ, MILUIM - מילואים, YOETZ - יועץ, KEVA - קבע
+  jobTitle: string; // תפקיד
+  
+  isOrderingCommander: boolean; // האם הוא מפקד מזמין
+  isRequiredYarkonirApporval: boolean; // האם נדרש אישור ירקוניר
+  isExistsMishmarAman: boolean; // האם קיים משמר אמ"ן
+  
+  
+  //ייתכן שזה לא בשימוש
   role: string; // תפקיד החייל
-  requiresYarkonirApproval: boolean; // האם נדרש אישור ירקוניר
-  hasMAMGuard: boolean; // האם קיים משמר אמ"ן
-  securityClearance: string; // סיווג בטחוני
-  allergies: string; // האם יש אלרגיה
 }
 export type SubmittingTypes = "OneDayWithoutAccommodation" | "AccommodationForSeveralDays" | "AccommodationAndExchangeSoldiers" | "BaseLeaving";
 
@@ -24,15 +32,15 @@ export type SubmittingTypes = "OneDayWithoutAccommodation" | "AccommodationForSe
 
 export interface BaseRequest {
   id: string;
-  createdRequestDate: Date; // תאריך יצירת הבקשה
+  createdRequestDate: string; // תאריך יצירת הבקשה toISOString
   submitter: string; // שם המשתמש שמילא את הבקשה
-  isApproved: Boolean; // סטטוס הבקשה
+  isApproved: boolean; // סטטוס הבקשה
   submittingType : SubmittingTypes;
 }
 
 export interface OneDayWithoutAccommodationSubmitting extends BaseRequest {
   incomingSoldier: Soldier; // החייל שמגיע לבסיס
-  arrivelDate: Date; // תאריך הגעה לבסיס
+  arrivelDate: string; // תאריך הגעה לבסיס
   base: string; // שם הבסיס
   isAlreadyWasInBase: boolean; // האם היה בבסיס בעבר
 }
@@ -40,8 +48,8 @@ export interface OneDayWithoutAccommodationSubmitting extends BaseRequest {
 
 export interface AccommodationForSeveralDaysSubmitting extends BaseRequest {
   incomingSoldier: Soldier; // החייל שמגיע לבסיס
-  arrivelDate: Date;
-  departureDate: Date; // תאריך עזיבה
+  arrivelDate: string; // תאריך הגעה לבסיס toISOString
+  departureDate: string; // תאריך עזיבה לבסיס toISOString
   base: string;
   isAlreadyWasInBase: boolean;
 }
@@ -51,15 +59,15 @@ export interface AccommodationForSeveralDaysSubmitting extends BaseRequest {
 export interface AccommodationAndExchangeSoldiersSubmitting  extends BaseRequest {
   leavingSoldier: Soldier; // החייל שעוזב
   incomingSoldier: Soldier; // החייל שמגיע לבסיס
-  arrivelDate: Date;
-  departureDate: Date;
-  leavingSoldierExitDate: Date;
+  arrivelDate: string; // תאריך הגעה לבסיס toISOString
+  departureDate: string; // תאריך עזיבה לבסיס toISOString
+  leavingSoldierExitDate: string; // תאריך עזיבת החייל שעוזב toISOString
   base: string;
 }
 
 export interface BaseLeavingSubmitting  extends BaseRequest {
   leavingSoldier: Soldier; // החייל שעוזב
-  exitDate: Date; // תאריך עזיבה
+  exitDate: string; // תאריך עזיבה toISOString
   base: string;
 }
 export type NewRequestDTO =

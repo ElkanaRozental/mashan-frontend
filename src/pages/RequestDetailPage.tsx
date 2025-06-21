@@ -54,13 +54,13 @@ if (!status) {
   const getSoldierName = (request: Request) => {
   if ('incomingSoldier' in request && 'leavingSoldier' in request) {
     // החלפת חיילים
-    return `${request.incomingSoldier.fullName} ← ${request.leavingSoldier.fullName}`;
+    return `${request.incomingSoldier.name} ← ${request.leavingSoldier.name}`;
   } else if ('incomingSoldier' in request) {
     // הצטרפות חד-יומית או עם לינה
-    return request.incomingSoldier.fullName;
+    return request.incomingSoldier.name;
   } else if ('leavingSoldier' in request) {
     // עזיבת בסיס
-    return request.leavingSoldier.fullName;
+    return request.leavingSoldier.name;
   }
   return '';
 };
@@ -70,18 +70,18 @@ if (!status) {
   const getSoldierPhone = (request: Request) => {
     if ('incomingSoldier' in request && 'leavingSoldier' in request) {
       // החלפת חיילים
-      return `${request.incomingSoldier.phone} / ${request.leavingSoldier.phone}`;
+      return `${request.incomingSoldier.phoneNumber} / ${request.leavingSoldier.phoneNumber}`;
     } else if ('incomingSoldier' in request) {
       // הצטרפות חד-יומית או עם לינה
-      return request.incomingSoldier.phone;
+      return request.incomingSoldier.phoneNumber;
     } else if ('leavingSoldier' in request) {
       // עזיבת בסיס
-      return request.leavingSoldier.phone;
+      return request.leavingSoldier.phoneNumber;
     }
     return '';
   };
 
-  const updateStatus = (newStatus: Boolean) => {
+  const updateStatus = (newStatus: boolean) => {
     updateRequestStatus(request.id, newStatus);
     toast({
       title: "סטטוס עודכן",

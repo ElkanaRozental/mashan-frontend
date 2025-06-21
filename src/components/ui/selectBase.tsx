@@ -19,7 +19,7 @@ const SelectBase = ({field}) => {
                     <SelectContent>
                       <SelectItem value="ירקון">ירקון</SelectItem>
                       <SelectItem value="רמות">רמות</SelectItem>
-                      <SelectItem value="יועץ">יועץ</SelectItem>
+                      <SelectItem value="שבעתה">שבעתה</SelectItem>
                     </SelectContent>
                   </Select>
     </div>

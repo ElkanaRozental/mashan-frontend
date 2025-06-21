@@ -20,6 +20,8 @@ export const getAllSubmitting = async ():Promise<Request[]> => {
 
 export const addRequest = async (request: Omit<Request, 'id' | 'createdRequestDate' | 'isApproved'>): Promise<Request> => {
   try {
+    console.log('Adding request:', request);
+    
     const response = await fetch(`${API_BASE_URL}/submitting`, {
       method: 'POST',
       headers: {
@@ -74,7 +76,7 @@ export const deleteRequest = async (id: string): Promise<void> => {
     throw error;
   }
 }
-export const updateRequestStatus = async (id: string, status: Boolean): Promise<Request> => {
+export const updateRequestStatus = async (id: string, status: boolean): Promise<Request> => {
     try {
         const response = await fetch(`${API_BASE_URL}/submitting/${id}/status`, {
         method: 'PUT',
