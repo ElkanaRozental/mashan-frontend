@@ -98,3 +98,19 @@ export const updateRequestStatus = async (id: string, status: boolean): Promise<
     }
     }
 
+export const getRequestMessage = async (id: string): Promise<string> => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/submitting/${id}/message`);
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch request message');
+        }
+        
+        const message = await response.text();
+        return message;
+    } catch (error) {
+        console.error('Error fetching request message:', error);
+        throw error;
+    }
+}
+

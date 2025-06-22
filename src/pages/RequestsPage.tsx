@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { Request } from '@/types';
 import { useAppStore } from '@/store/useAppStore';
 import { useToast } from '@/hooks/use-toast';
+import { getRequestMessage } from '@/services/requestService';
 
 const RequestsPage = () => {
   const { submitting, updateRequestStatus, loadSubmitting, isLoading } = useAppStore();
@@ -126,17 +127,9 @@ const uniqueMadars = useMemo(() => {
     setIsDialogOpen(false);
   };
 
-  const generateRequestMessage = (request: Request) => {
-    // This would generate the same message as in the forms
-    // For now, return a basic message
-    const soldierName = getSoldierName(request);
-    const type = getRequestTypeText(request.submittingType);
-    return `בקשה: ${type}\nחייל: ${soldierName}\nתאריך יצירה: ${format(request.createdRequestDate, 'dd/MM/yyyy')}`;
-  };
-
   const copyMessage = async (request: Request) => {
-    const message = generateRequestMessage(request);
     try {
+      const message = await getRequestMessage(request.id);
       await navigator.clipboard.writeText(message);
       toast({
         title: "הועתק בהצלחה",
