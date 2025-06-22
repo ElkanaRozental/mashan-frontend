@@ -2,7 +2,7 @@
 
 import { Request } from "@/types";
 
-const API_BASE_URL = 'http://localhost:3000/api'; // Update with your actual API base URL
+const API_BASE_URL = 'http://localhost:8080/api'; // Update with your actual API base URL
 
 export const getAllSubmitting = async ():Promise<Request[]> => {
   try {

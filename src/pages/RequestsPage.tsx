@@ -1,5 +1,4 @@
-
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { FileText, Filter, MoreHorizontal, Copy, Eye, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { Request } from '@/types';
@@ -15,7 +15,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { useToast } from '@/hooks/use-toast';
 
 const RequestsPage = () => {
-  const { submitting, updateRequestStatus } = useAppStore();
+  const { submitting, updateRequestStatus, loadSubmitting, isLoading } = useAppStore();
   console.log('submitting', submitting);
   
   const { toast } = useToast();
@@ -24,6 +24,12 @@ const RequestsPage = () => {
   const [statusFilter, setStatusFilter] = useState<'true' | 'false' | 'all'>('all');
   const [madorFilter, setMadorFilter] = useState<number | 'all'>('all');
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Load submitting data when component mounts
+  useEffect(() => {
+    loadSubmitting();
+  }, [loadSubmitting]);
 
   // Get unique madars for filter
 const uniqueMadars = useMemo(() => {
@@ -117,6 +123,7 @@ const uniqueMadars = useMemo(() => {
       title: "סטטוס עודכן",
       description: `הבקשה עודכנה ל${newStatus}`,
     });
+    setIsDialogOpen(false);
   };
 
   const generateRequestMessage = (request: Request) => {
@@ -196,97 +203,122 @@ const uniqueMadars = useMemo(() => {
         </CardHeader>
         
         <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>סוג בקשה</TableHead>
-                  <TableHead>חייל/ים</TableHead>
-                  <TableHead>תאריך יצירה</TableHead>
-                  <TableHead>נוצר על ידי</TableHead>
-                  <TableHead>סטטוס</TableHead>
-                  <TableHead>פעולות</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredRequests.map((request) => (
-                  <TableRow key={request.id}>
-                    <TableCell className="font-medium">
-                      {getRequestTypeText(request.submittingType)}
-                    </TableCell>
-                    <TableCell>{getSoldierName(request)}</TableCell>
-                    <TableCell>{request.createdRequestDate}</TableCell>
-                    <TableCell>{request.submitter}</TableCell>
-                    <TableCell>{getStatusBadge(request.isApproved)}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => copyMessage(request)}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setSelectedRequest(request)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>פרטי הבקשה</DialogTitle>
-                            </DialogHeader>
-                            {selectedRequest && (
-                              <div className="space-y-4">
-                                <div>
-                                  <strong>סוג בקשה:</strong> {getRequestTypeText(selectedRequest.submittingType)}
-                                </div>
-                                <div>
-                                  <strong>חייל:</strong> {getSoldierName(selectedRequest)}
-                                </div>
-                                <div>
-                                  <strong>סטטוס נוכחי:</strong> {getStatusBadge(selectedRequest.isApproved)}
-                                </div>
-                                <div className="flex gap-2">
-                                  <Button
-                                    size="sm"
-                                    onClick={() => updateStatus(selectedRequest.id, true)}
-                                    disabled={selectedRequest.isApproved === true}
-                                  >
-                                    אשר
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => updateStatus(selectedRequest.id, false)}
-                                    disabled={selectedRequest.isApproved === false}
-                                  >
-                                    החזר להמתנה
-                                  </Button>
-                                </div>
-                              </div>
-                            )}
-                          </DialogContent>
-                        </Dialog>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            
-            {filteredRequests.length === 0 && (
-              <div className="text-center py-12 text-gray-500">
-                לא נמצאו בקשות המתאימות לקריטריונים
+          {isLoading ? (
+            <div className="text-center py-12 text-gray-500">
+              טוען בקשות...
+            </div>
+          ) : (
+            <TooltipProvider>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>סוג בקשה</TableHead>
+                      <TableHead>חייל/ים</TableHead>
+                      <TableHead>תאריך יצירה</TableHead>
+                      <TableHead>נוצר על ידי</TableHead>
+                      <TableHead>סטטוס</TableHead>
+                      <TableHead>פעולות</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredRequests.map((request) => (
+                      <TableRow key={request.id}>
+                        <TableCell className="font-medium">
+                          {getRequestTypeText(request.submittingType)}
+                        </TableCell>
+                        <TableCell>{getSoldierName(request)}</TableCell>
+                        <TableCell>{request.createdRequestDate}</TableCell>
+                        <TableCell>{request.submitter}</TableCell>
+                        <TableCell>{getStatusBadge(request.isApproved)}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => copyMessage(request)}
+                                >
+                                  <Copy className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>העתק מסר</p>
+                              </TooltipContent>
+                            </Tooltip>
+                            
+                            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <DialogTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        setSelectedRequest(request);
+                                        setIsDialogOpen(true);
+                                      }}
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                    </Button>
+                                  </DialogTrigger>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>פרטים</p>
+                                </TooltipContent>
+                              </Tooltip>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>פרטי הבקשה</DialogTitle>
+                                </DialogHeader>
+                                {selectedRequest && (
+                                  <div className="space-y-4">
+                                    <div>
+                                      <strong>סוג בקשה:</strong> {getRequestTypeText(selectedRequest.submittingType)}
+                                    </div>
+                                    <div>
+                                      <strong>חייל:</strong> {getSoldierName(selectedRequest)}
+                                    </div>
+                                    <div>
+                                      <strong>סטטוס נוכחי:</strong> {getStatusBadge(selectedRequest.isApproved)}
+                                    </div>
+                                    <div className="flex gap-2">
+                                      <Button
+                                        size="sm"
+                                        onClick={() => updateStatus(selectedRequest.id, true)}
+                                        disabled={selectedRequest.isApproved === true}
+                                      >
+                                        אשר
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => updateStatus(selectedRequest.id, false)}
+                                        disabled={selectedRequest.isApproved === false}
+                                      >
+                                        החזר להמתנה
+                                      </Button>
+                                    </div>
+                                  </div>
+                                )}
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                
+                {filteredRequests.length === 0 && (
+                  <div className="text-center py-12 text-gray-500">
+                    לא נמצאו בקשות המתאימות לקריטריונים
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </TooltipProvider>
+          )}
         </CardContent>
       </Card>
     </div>
