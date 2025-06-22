@@ -18,14 +18,16 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const { isAuthenticated } = useAppStore();
-  const loadSoldiers = useAppStore(state => state.loadSoldiers);
+  
+  /*const loadSoldiers = useAppStore(state => state.loadSoldiers);
   const loadRequests = useAppStore(state => state.loadSubmitting);
 
   useEffect(() => {
     loadSoldiers();
     loadRequests();
     console.log("Loading soldiers and submitting...");
-  }, []);
+  }, []);*/
+  //maor
 
   return (
     <QueryClientProvider client={queryClient}>

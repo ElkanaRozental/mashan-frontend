@@ -2,7 +2,7 @@
 
 import { Request } from "@/types";
 
-const API_BASE_URL = 'http://localhost:3000/api'; // Update with your actual API base URL
+const API_BASE_URL = 'http://localhost:8080/api'; // Update with your actual API base URL
 
 export const getAllSubmitting = async ():Promise<Request[]> => {
   try {
@@ -97,4 +97,20 @@ export const updateRequestStatus = async (id: string, status: boolean): Promise<
         throw error;
     }
     }
+
+export const getRequestMessage = async (id: string): Promise<string> => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/submitting/${id}/message`);
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch request message');
+        }
+        
+        const message = await response.text();
+        return message;
+    } catch (error) {
+        console.error('Error fetching request message:', error);
+        throw error;
+    }
+}
 

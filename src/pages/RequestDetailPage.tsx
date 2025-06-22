@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,12 +9,14 @@ import { useAppStore } from '@/store/useAppStore';
 import { useToast } from '@/hooks/use-toast';
 import { Request } from '@/types';
 import MessagePreview from '@/components/MessagePreview';
+import { getRequestMessage } from '@/services/requestService';
 
 const RequestDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { submitting: requests, updateRequestStatus } = useAppStore();
+  const [message, setMessage] = useState<string>('');
   
   const request = requests.find(r => r.id === id);
   
@@ -89,37 +90,10 @@ if (!status) {
     });
   };
 
-  const generateRequestMessage = (request: Request) => {
-    const soldierName = getSoldierName(request);
-    const type = getRequestTypeText(request.submittingType);
-    const requestUrl = `${window.location.origin}/requests/${request.id}`;
-    
-    let message = `🔸 ${type}\n`;
-    message += `👤 חייל: ${soldierName}\n`;
-    message += `📅 תאריך יצירה: ${format(request.createdRequestDate, 'dd/MM/yyyy')}\n`;
-    message += `📊 סטטוס: ${request.isApproved}\n`;
-    
-    if ('baseName' in request) {
-      message += `🏢 בסיס: ${request.base}\n`;
-    }
-    
-    if ('arrivelDate' in request) {
-      message += `📅 תאריך הגעה: ${format(request.arrivelDate, 'dd/MM/yyyy')}\n`;
-    }
-    
-    if ('departureDate' in request) {
-      message += `📅 תאריך עזיבה: ${format(request.departureDate, 'dd/MM/yyyy')}\n`;
-    }
-    
-    message += `\n🔗 לצפיה בפרטים המלאים: ${requestUrl}`;
-    
-    return message;
-  };
-
   const copyMessage = async () => {
-    const message = generateRequestMessage(request);
     try {
-      await navigator.clipboard.writeText(message);
+      const fetchedMessage = await getRequestMessage(request.id);
+      await navigator.clipboard.writeText(fetchedMessage);
       toast({
         title: "הועתק בהצלחה",
         description: "ההודעה הועתקה ללוח",
@@ -132,6 +106,23 @@ if (!status) {
       });
     }
   };
+
+  // Load message when component mounts
+  React.useEffect(() => {
+    const loadMessage = async () => {
+      if (request) {
+        try {
+          const fetchedMessage = await getRequestMessage(request.id);
+          setMessage(fetchedMessage);
+        } catch (err) {
+          console.error('Error loading message:', err);
+          setMessage('שגיאה בטעינת ההודעה');
+        }
+      }
+    };
+    
+    loadMessage();
+  }, [request]);
 
   const renderRequestDetails = () => {
     if (request.submittingType === 'OneDayWithoutAccommodation' || request.submittingType === 'AccommodationForSeveralDays') {
@@ -306,7 +297,7 @@ if (!status) {
           </CardHeader>
           <CardContent>
             <MessagePreview 
-              message={generateRequestMessage(request)} 
+              message={message} 
               soldierPhone={getSoldierPhone(request)}
             />
           </CardContent>
