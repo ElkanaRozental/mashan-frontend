@@ -28,13 +28,13 @@ export interface Soldier {
 }
 export type SubmittingTypes = "OneDayWithoutAccommodation" | "AccommodationForSeveralDays" | "AccommodationAndExchangeSoldiers" | "BaseLeaving";
 
-
+export type StatusTypes = "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED";
 
 export interface BaseRequest {
   id: string;
   createdRequestDate: string; // תאריך יצירת הבקשה toISOString
   submitter: string; // שם המשתמש שמילא את הבקשה
-  isApproved: boolean; // סטטוס הבקשה
+  status: StatusTypes; // סטטוס הבקשה
   submittingType : SubmittingTypes;
 }
 
@@ -71,10 +71,10 @@ export interface BaseLeavingSubmitting  extends BaseRequest {
   base: string;
 }
 export type NewRequestDTO =
-  | Omit<OneDayWithoutAccommodationSubmitting, 'id' | 'createdRequestDate' | 'submitter' | 'isApproved'>
-  | Omit<AccommodationForSeveralDaysSubmitting, 'id' |  'createdRequestDate' | 'submitter' | 'isApproved'>
-  | Omit<AccommodationAndExchangeSoldiersSubmitting , 'id' |  'createdRequestDate' | 'submitter' | 'isApproved'>
-  | Omit<BaseLeavingSubmitting , 'id' |  'createdRequestDate' | 'submitter' | 'isApproved'>;
+  | Omit<OneDayWithoutAccommodationSubmitting, 'id' | 'createdRequestDate' | 'submitter' | 'status'>
+  | Omit<AccommodationForSeveralDaysSubmitting, 'id' |  'createdRequestDate' | 'submitter' | 'status'>
+  | Omit<AccommodationAndExchangeSoldiersSubmitting , 'id' |  'createdRequestDate' | 'submitter' | 'status'>
+  | Omit<BaseLeavingSubmitting , 'id' |  'createdRequestDate' | 'submitter' | 'status'>;
 
 export type Request = OneDayWithoutAccommodationSubmitting | AccommodationForSeveralDaysSubmitting | AccommodationAndExchangeSoldiersSubmitting  | BaseLeavingSubmitting ;
 

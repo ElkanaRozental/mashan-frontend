@@ -18,7 +18,7 @@ export const getAllSubmitting = async ():Promise<Request[]> => {
   }
 }
 
-export const addRequest = async (request: Omit<Request, 'id' | 'createdRequestDate' | 'isApproved'>): Promise<Request> => {
+export const addRequest = async (request: Omit<Request, 'id' | 'createdRequestDate' | 'status'>): Promise<Request> => {
   try {
     console.log('Adding request:', request);
     
@@ -41,6 +41,7 @@ export const addRequest = async (request: Omit<Request, 'id' | 'createdRequestDa
     throw error;
   }
 }
+
 export const updateRequest = async (id: string, request: Partial<Request>): Promise<Request> => {
   try {
     const response = await fetch(`${API_BASE_URL}/submitting/${id}`, {
@@ -62,6 +63,7 @@ export const updateRequest = async (id: string, request: Partial<Request>): Prom
     throw error;
   }
 }
+
 export const deleteRequest = async (id: string): Promise<void> => {
   try {
     const response = await fetch(`${API_BASE_URL}/submitting/${id}`, {
@@ -76,7 +78,8 @@ export const deleteRequest = async (id: string): Promise<void> => {
     throw error;
   }
 }
-export const updateRequestStatus = async (id: string, status: boolean): Promise<Request> => {
+
+export const updateRequestStatus = async (id: string, status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED'): Promise<Request> => {
     try {
         const response = await fetch(`${API_BASE_URL}/submitting/${id}/status`, {
         method: 'PUT',

@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Soldier, Request, AppState, User, NewRequestDTO } from '../types';
@@ -31,8 +30,8 @@ interface AppStore extends AppState {
   // Request actions
   loadSubmitting: () => Promise<void>;
   addRequest: (request:NewRequestDTO) => Promise<void>;
-  updateRequestStatus: (id: string, status: boolean) => Promise<void>;
-  getRequestsByFilter: (filter: { status?: Request['isApproved']; mador?: number; soldierName?: string }) => Request[];
+  updateRequestStatus: (id: string, status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED') => Promise<void>;
+  getRequestsByFilter: (filter: { status?: boolean; mador?: number; soldierName?: string }) => Request[];
 
   // UI actions
   setLoading: (loading: boolean) => void;
@@ -154,7 +153,10 @@ export const useAppStore = create<AppStore>()(
           const  submitting: Request  = await updateRequestStatus(id,  status );
           set(state => ({
               submitting: state.submitting.map(request =>
-                request.id === id ? { ...submitting, isApproved: status } : request
+                request.id === id ? { 
+                  ...submitting, 
+                  status: status
+                } : request
               )
             }));
           } catch (error) {
@@ -165,7 +167,10 @@ export const useAppStore = create<AppStore>()(
       getRequestsByFilter: (filter: { status?: boolean; mador?: number; soldierName?: string }) => {
         const { submitting: requests } = get();
         return requests.filter((request) => {
-          if (filter.status !== undefined && request.isApproved !== filter.status) return false;
+          if (filter.status !== undefined) {
+            const isApproved = request.status === 'APPROVED';
+            if (isApproved !== filter.status) return false;
+          }
       
           // בדיקה אם מדובר בבקשה עם חייל נכנס או חייל יוצא
           const soldier =

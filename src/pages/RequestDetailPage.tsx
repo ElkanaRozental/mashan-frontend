@@ -43,14 +43,20 @@ const RequestDetailPage = () => {
     }
   };
 
-  const getStatusBadge = (status: Boolean) => {
-if (!status) {
-      return <Badge variant="secondary" className="bg-gray-100 text-gray-800">ממתין לאישור</Badge>;
+  const getStatusBadge = (status: Request['status']) => {
+    switch (status) {
+      case 'PENDING':
+        return <Badge variant="secondary" className="bg-gray-100 text-gray-800">ממתין לאישור</Badge>;
+      case 'APPROVED':
+        return <Badge variant="secondary" className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 ml-1" />{"הבקשה אושרה"}</Badge>;
+      case 'REJECTED':
+        return <Badge variant="secondary" className="bg-red-100 text-red-800"><XCircle className="h-3 w-3 ml-1" />{"הבקשה נדחתה"}</Badge>;
+      case 'CANCELLED':
+        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">בוטל על ידי מגיש הבקשה</Badge>;
+      default:
+        return <Badge variant="secondary" className="bg-gray-100 text-gray-800">ממתין לאישור</Badge>;
     }
-     else{
-       return <Badge variant="secondary" className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 ml-1" />{"הבקשה אושרה"}</Badge>;
-     }
-    };
+  };
 
   const getSoldierName = (request: Request) => {
   if ('incomingSoldier' in request && 'leavingSoldier' in request) {
@@ -82,11 +88,11 @@ if (!status) {
     return '';
   };
 
-  const updateStatus = (newStatus: boolean) => {
+  const updateStatus = (newStatus: 'PENDING' | 'APPROVED' | 'REJECTED') => {
     updateRequestStatus(request.id, newStatus);
     toast({
       title: "סטטוס עודכן",
-      description: `הבקשה עודכנה ל${newStatus}`,
+      description: `הבקשה עודכנה ל${newStatus === 'APPROVED' ? 'אושרה' : newStatus === 'REJECTED' ? 'נדחתה' : 'ממתינה'}`,
     });
   };
 
@@ -202,7 +208,7 @@ if (!status) {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div><strong>סוג בקשה:</strong> {getRequestTypeText(request.submittingType)}</div>
-              <div><strong>סטטוס:</strong> {getStatusBadge(request.isApproved)}</div>
+              <div><strong>סטטוס:</strong> {getStatusBadge(request.status)}</div>
               <div><strong>תאריך יצירה:</strong> {format(request.createdRequestDate, 'dd/MM/yyyy HH:mm')}</div>
               <div><strong>נוצר על ידי:</strong> {request.submitter}</div>
             </div>
@@ -263,14 +269,14 @@ if (!status) {
           <CardContent>
             <div className="space-y-4">
               <div>
-                <strong>סטטוס נוכחי:</strong> {getStatusBadge(request.isApproved)}
+                <strong>סטטוס נוכחי:</strong> {getStatusBadge(request.status)}
               </div>
               
               <div className="flex gap-2">
                 <Button
                   size="sm"
-                  onClick={() => updateStatus(true)}
-                  disabled={request.isApproved === true}
+                  onClick={() => updateStatus('APPROVED')}
+                  disabled={request.status === 'APPROVED'}
                   className="bg-green-600 hover:bg-green-700"
                 >
                   <CheckCircle className="h-4 w-4 ml-2" />
@@ -279,8 +285,8 @@ if (!status) {
                 <Button
                   size="sm"
                   variant="destructive"
-                  onClick={() => updateStatus(false)}
-                  disabled={request.isApproved === false}
+                  onClick={() => updateStatus('REJECTED')}
+                  disabled={request.status === 'REJECTED'}
                 >
                   <XCircle className="h-4 w-4 ml-2" />
                   דחה

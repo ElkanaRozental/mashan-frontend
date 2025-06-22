@@ -50,8 +50,11 @@ const uniqueMadars = useMemo(() => {
   const filteredRequests = useMemo(() => {
     return submitting.filter(request => {
       // Status filter
-      if (statusFilter !== 'all' && request.isApproved.toString() !== statusFilter) {
-        return false;
+      if (statusFilter !== 'all') {
+        const isApproved = request.status === 'APPROVED';
+        if (isApproved.toString() !== statusFilter) {
+          return false;
+        }
       }
 
       // Mador filter
@@ -97,12 +100,18 @@ const uniqueMadars = useMemo(() => {
     }
   };
 
-  const getStatusBadge = (status: boolean) => {
-    if (status) {
-      return <Badge variant="secondary" className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 ml-1" />{"מאושר"}</Badge>;
-    }
-      else{
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800"><Clock className="h-3 w-3 ml-1" />{"ממתין לאישור"}</Badge>;
+  const getStatusBadge = (status: Request['status']) => {
+    switch (status) {
+      case 'PENDING':
+        return <Badge variant="secondary" className="bg-gray-100 text-gray-800">ממתין לאישור</Badge>;
+      case 'APPROVED':
+        return <Badge variant="secondary" className="bg-green-100 text-green-800">אושר</Badge>;
+      case 'REJECTED':
+        return <Badge variant="secondary" className="bg-red-100 text-red-800">נדחה</Badge>;
+      case 'CANCELLED':
+        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">בוטל</Badge>;
+      default:
+        return <Badge variant="secondary" className="bg-gray-100 text-gray-800">ממתין לאישור</Badge>;
     }
   };
 
@@ -118,11 +127,11 @@ const uniqueMadars = useMemo(() => {
     return '';
   };
 
-  const updateStatus = (requestId: string, newStatus: boolean) => {
+  const updateStatus = (requestId: string, newStatus: 'PENDING' | 'APPROVED' | 'REJECTED') => {
     updateRequestStatus(requestId, newStatus);
     toast({
       title: "סטטוס עודכן",
-      description: `הבקשה עודכנה ל${newStatus}`,
+      description: `הבקשה עודכנה בהצלחה`,
     });
     setIsDialogOpen(false);
   };
@@ -223,7 +232,7 @@ const uniqueMadars = useMemo(() => {
                         <TableCell>{getSoldierName(request)}</TableCell>
                         <TableCell>{request.createdRequestDate}</TableCell>
                         <TableCell>{request.submitter}</TableCell>
-                        <TableCell>{getStatusBadge(request.isApproved)}</TableCell>
+                        <TableCell>{getStatusBadge(request.status)}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Tooltip>
@@ -274,21 +283,32 @@ const uniqueMadars = useMemo(() => {
                                       <strong>חייל:</strong> {getSoldierName(selectedRequest)}
                                     </div>
                                     <div>
-                                      <strong>סטטוס נוכחי:</strong> {getStatusBadge(selectedRequest.isApproved)}
+                                      <strong>סטטוס נוכחי:</strong> {getStatusBadge(selectedRequest.status)}
                                     </div>
                                     <div className="flex gap-2">
                                       <Button
                                         size="sm"
-                                        onClick={() => updateStatus(selectedRequest.id, true)}
-                                        disabled={selectedRequest.isApproved === true}
+                                        onClick={() => updateStatus(selectedRequest.id, 'APPROVED')}
+                                        disabled={selectedRequest.status === 'APPROVED'}
+                                        className="bg-green-600 hover:bg-green-700"
                                       >
                                         אשר
                                       </Button>
                                       <Button
                                         size="sm"
                                         variant="outline"
-                                        onClick={() => updateStatus(selectedRequest.id, false)}
-                                        disabled={selectedRequest.isApproved === false}
+                                        onClick={() => updateStatus(selectedRequest.id, 'REJECTED')}
+                                        disabled={selectedRequest.status === 'REJECTED'}
+                                        className="border-red-300 text-red-700 hover:bg-red-50"
+                                      >
+                                        דחה
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => updateStatus(selectedRequest.id, 'PENDING')}
+                                        disabled={selectedRequest.status === 'PENDING'}
+                                        className="border-gray-400 text-gray-600 hover:bg-gray-100"
                                       >
                                         החזר להמתנה
                                       </Button>
