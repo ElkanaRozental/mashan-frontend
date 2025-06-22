@@ -17,6 +17,14 @@ import { useAppStore } from '@/store/useAppStore';
 import SoldierSearch from '@/components/SoldierSearch';
 import MessagePreview from '@/components/MessagePreview';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import SelectBase from '../ui/selectBase';
 
 const formSchema = z.object({
   arrivalDate: z.date({
@@ -48,10 +56,10 @@ const DayOnlyRequestForm = () => {
 
     const message = `בקשה להצטרפות חד-יומית
 
-חייל: ${selectedSoldier.fullName}
-מספר אישי: ${selectedSoldier.militaryId}
+חייל: ${selectedSoldier.name}
+מספר אישי: ${selectedSoldier.privateNumber}
 דרגה: ${selectedSoldier.rank}
-מדור: ${selectedSoldier.mador}
+מדור: ${selectedSoldier.department}
 תפקיד: ${selectedSoldier.role}
 
 פרטי הבקשה:
@@ -60,7 +68,7 @@ const DayOnlyRequestForm = () => {
 נדרש אישור בסיס: ${data.requiresBaseApproval ? 'כן' : 'לא'}
 היה בבסיס בעבר: ${data.hasBeenAtBaseBefore ? 'כן' : 'לא'}
 
-טלפון ליצירת קשר: ${selectedSoldier.phone}`;
+טלפון ליצירת קשר: ${selectedSoldier.phoneNumber}`;
 
     setGeneratedMessage(message);
     return message;
@@ -79,12 +87,11 @@ const DayOnlyRequestForm = () => {
     const message = generateMessage(data);
     
     addRequest({
-      type: 'dayOnly',
-      soldier: selectedSoldier,
-      arrivalDate: data.arrivalDate,
-      baseName: data.baseName,
-      requiresBaseApproval: data.requiresBaseApproval,
-      hasBeenAtBaseBefore: data.hasBeenAtBaseBefore,
+      submittingType: 'OneDayWithoutAccommodation',
+      incomingSoldier: selectedSoldier,
+      arrivelDate: data.arrivalDate.toISOString(),
+      base: data.baseName,
+      isAlreadyWasInBase: data.hasBeenAtBaseBefore,
     });
 
     toast({
@@ -161,14 +168,13 @@ const DayOnlyRequestForm = () => {
                   <FormItem>
                     <FormLabel>שם הבסיס</FormLabel>
                     <FormControl>
-                      <Input placeholder="הכנס שם בסיס" {...field} />
+                  <SelectBase field={field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-
             <div className="space-y-4 mt-4">
               <FormField
                 control={form.control}
@@ -209,7 +215,7 @@ const DayOnlyRequestForm = () => {
           </div>
 
           <div className="flex gap-2">
-            <Button
+            {/* <Button
               type="button"
               variant="outline"
               onClick={() => {
@@ -227,7 +233,7 @@ const DayOnlyRequestForm = () => {
             >
               <Send className="h-4 w-4 ml-2" />
               צור הודעה
-            </Button>
+            </Button> */}
             
             <Button type="submit">
               <Save className="h-4 w-4 ml-2" />
@@ -240,7 +246,7 @@ const DayOnlyRequestForm = () => {
       {generatedMessage && (
         <MessagePreview
           message={generatedMessage}
-          soldierPhone={selectedSoldier?.phone}
+          soldierPhone={selectedSoldier?.phoneNumber}
         />
       )}
     </div>

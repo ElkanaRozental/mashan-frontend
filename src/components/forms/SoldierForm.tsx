@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -35,39 +34,43 @@ const SoldierForm: React.FC<SoldierFormProps> = ({ soldier, onClose }) => {
   
   const form = useForm<Omit<Soldier, 'id'>>({
     defaultValues: soldier ? {
-      fullName: soldier.fullName,
-      militaryId: soldier.militaryId,
-      tz: soldier.tz,
-      phone: soldier.phone,
+      name: soldier.name,
+      privateNumber: soldier.privateNumber,
+      personalId: soldier.personalId,
+      phoneNumber: soldier.phoneNumber,
       gender: soldier.gender,
       rank: soldier.rank,
-      serviceType: soldier.serviceType,
+      jobKind: soldier.jobKind,
       center: soldier.center,
-      anaf: soldier.anaf,
-      mador: soldier.mador,
-      team: soldier.team || '',
+      branch: soldier.branch,
+      department: soldier.department,
+      team: soldier.team ?? undefined,
       role: soldier.role,
-      requiresYarkonirApproval: soldier.requiresYarkonirApproval,
-      hasMAMGuard: soldier.hasMAMGuard,
-      securityClearance: soldier.securityClearance,
+      isRequiredYarkonirApporval: soldier.isRequiredYarkonirApporval,
+      isExistsMishmarAman: soldier.isExistsMishmarAman,
+      clarance: soldier.clarance,
       allergies: soldier.allergies,
+      jobTitle: soldier.jobTitle,
+      isOrderingCommander: soldier.isOrderingCommander,
     } : {
-      fullName: '',
-      militaryId: '',
-      tz: '',
-      phone: '',
-      gender: 'ז',
+      name: '',
+      privateNumber: '',
+      personalId: '',
+      phoneNumber: '',
+      gender: 'MALE',
       rank: '',
-      serviceType: 'סדיר',
-      center: '',
-      anaf: '',
-      mador: '',
-      team: '',
+      jobKind: 'SADIR',
+      center: 0,
+      branch: 0,
+      department: 0,
+      team: undefined,
       role: '',
-      requiresYarkonirApproval: false,
-      hasMAMGuard: false,
-      securityClearance: '',
+      isRequiredYarkonirApporval: false,
+      isExistsMishmarAman: false,
+      clarance: 0,
       allergies: '',
+      jobTitle: '',
+      isOrderingCommander: false,
     }
   });
 
@@ -77,13 +80,13 @@ const SoldierForm: React.FC<SoldierFormProps> = ({ soldier, onClose }) => {
         updateSoldier(soldier.id, data);
         toast({
           title: "החייל עודכן בהצלחה",
-          description: `פרטי ${data.fullName} נשמרו במערכת`,
+          description: `פרטי ${data.name} נשמרו במערכת`,
         });
       } else {
         addSoldier(data);
         toast({
           title: "החייל נוסף בהצלחה",
-          description: `${data.fullName} נוסף למערכת`,
+          description: `${data.name} נוסף למערכת`,
         });
       }
       onClose();
@@ -103,7 +106,7 @@ const SoldierForm: React.FC<SoldierFormProps> = ({ soldier, onClose }) => {
           <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="fullName"
+              name="name"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>שם מלא</FormLabel>
@@ -117,7 +120,7 @@ const SoldierForm: React.FC<SoldierFormProps> = ({ soldier, onClose }) => {
             
             <FormField
               control={form.control}
-              name="militaryId"
+              name="privateNumber"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>מספר אישי</FormLabel>
@@ -131,7 +134,7 @@ const SoldierForm: React.FC<SoldierFormProps> = ({ soldier, onClose }) => {
             
             <FormField
               control={form.control}
-              name="tz"
+              name="personalId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>תעודת זהות</FormLabel>
@@ -145,7 +148,7 @@ const SoldierForm: React.FC<SoldierFormProps> = ({ soldier, onClose }) => {
             
             <FormField
               control={form.control}
-              name="phone"
+              name="phoneNumber"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>טלפון נייד</FormLabel>
@@ -170,8 +173,8 @@ const SoldierForm: React.FC<SoldierFormProps> = ({ soldier, onClose }) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="ז">זכר</SelectItem>
-                      <SelectItem value="נ">נקבה</SelectItem>
+                      <SelectItem value="MALE">זכר</SelectItem>
+                      <SelectItem value="FEMALE">נקבה</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -195,7 +198,7 @@ const SoldierForm: React.FC<SoldierFormProps> = ({ soldier, onClose }) => {
             
             <FormField
               control={form.control}
-              name="serviceType"
+              name="jobKind"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>סוג שירות</FormLabel>
@@ -206,9 +209,11 @@ const SoldierForm: React.FC<SoldierFormProps> = ({ soldier, onClose }) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="סדיר">סדיר</SelectItem>
-                      <SelectItem value="מילואים">מילואים</SelectItem>
-                      <SelectItem value="יועץ">יועץ</SelectItem>
+                      <SelectItem value="SADIR">סדיר</SelectItem>
+                      <SelectItem value="SAHATZ">שירות חוץ</SelectItem>
+                      <SelectItem value="MILUIM">מילואים</SelectItem>
+                      <SelectItem value="YOETZ">יועץ</SelectItem>
+                      <SelectItem value="KEVA">קבע</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -232,7 +237,7 @@ const SoldierForm: React.FC<SoldierFormProps> = ({ soldier, onClose }) => {
             
             <FormField
               control={form.control}
-              name="anaf"
+              name="branch"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>ענף</FormLabel>
@@ -246,7 +251,7 @@ const SoldierForm: React.FC<SoldierFormProps> = ({ soldier, onClose }) => {
             
             <FormField
               control={form.control}
-              name="mador"
+              name="department"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>מדור</FormLabel>
@@ -288,12 +293,12 @@ const SoldierForm: React.FC<SoldierFormProps> = ({ soldier, onClose }) => {
             
             <FormField
               control={form.control}
-              name="securityClearance"
+              name="clarance"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>סיווג בטחוני</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input type="number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -318,7 +323,7 @@ const SoldierForm: React.FC<SoldierFormProps> = ({ soldier, onClose }) => {
           <div className="space-y-4">
             <FormField
               control={form.control}
-              name="requiresYarkonirApproval"
+              name="isRequiredYarkonirApporval"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                   <FormControl>
@@ -334,7 +339,7 @@ const SoldierForm: React.FC<SoldierFormProps> = ({ soldier, onClose }) => {
             
             <FormField
               control={form.control}
-              name="hasMAMGuard"
+              name="isExistsMishmarAman"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                   <FormControl>

@@ -46,6 +46,8 @@ const MessagePreview: React.FC<MessagePreviewProps> = ({ message, soldierPhone }
 
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${phoneToUse.replace(/\D/g, '')}?text=${encodedMessage}`;
+    console.log(`Opening WhatsApp with URL: ${whatsappUrl}`);
+    
     window.open(whatsappUrl, '_blank');
   };
 

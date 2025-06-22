@@ -4,17 +4,27 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { CalendarIcon, Save, Send } from 'lucide-react';
+import { format } from 'date-fns';
+
+
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Save, Send } from 'lucide-react';
 import { Soldier } from '@/types';
 import { useAppStore } from '@/store/useAppStore';
 import SoldierSearch from '@/components/SoldierSearch';
 import MessagePreview from '@/components/MessagePreview';
 import { useToast } from '@/hooks/use-toast';
+import SelectBase from '../ui/selectBase';
+import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
-  baseName: z.string().min(1, "יש למלא שם בסיס"),
+  base: z.string().min(1, "יש למלא שם בסיס"),
+  exitDate: z.date({
+    required_error: "יש לבחור תאריך עזיבה",
+  }),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -27,6 +37,9 @@ const LeaveRequestForm = () => {
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      base: '',
+    },
   });
 
   const generateMessage = (data: FormData) => {
@@ -34,17 +47,17 @@ const LeaveRequestForm = () => {
 
     const message = `בקשה לעזיבת בסיס
 
-חייל: ${selectedSoldier.fullName}
-מספר אישי: ${selectedSoldier.militaryId}
+חייל: ${selectedSoldier.name}
+מספר אישי: ${selectedSoldier.privateNumber}
 דרגה: ${selectedSoldier.rank}
-מדור: ${selectedSoldier.mador}
+מדור: ${selectedSoldier.department}
 תפקיד: ${selectedSoldier.role}
 
 פרטי הבקשה:
-בסיס: ${data.baseName}
+בסיס: ${data.base}
 סוג בקשה: עזיבת בסיס
 
-טלפון ליצירת קשר: ${selectedSoldier.phone}`;
+טלפון ליצירת קשר: ${selectedSoldier.phoneNumber}`;
 
     setGeneratedMessage(message);
     return message;
@@ -63,9 +76,10 @@ const LeaveRequestForm = () => {
     const message = generateMessage(data);
     
     addRequest({
-      type: 'leave',
-      soldier: selectedSoldier,
-      baseName: data.baseName,
+      submittingType: 'BaseLeaving',
+      leavingSoldier: selectedSoldier,
+      exitDate: data.exitDate.toISOString(), 
+      base: data.base,
     });
 
     toast({
@@ -96,27 +110,69 @@ const LeaveRequestForm = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="baseName"
+                name="exitDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>תאריך עזיבה</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "dd/MM/yyyy")
+                            ) : (
+                              <span>בחר תאריך</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="base"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>שם הבסיס</FormLabel>
                     <FormControl>
-                      <Input placeholder="הכנס שם בסיס" {...field} />
+                      <SelectBase field={field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
             </div>
           </div>
 
           <div className="flex gap-2">
-            <Button
+            {/* <Button
               type="button"
               variant="outline"
               onClick={() => {
                 const data = form.getValues();
-                if (selectedSoldier && data.baseName) {
+                if (selectedSoldier && data.base) {
                   generateMessage(data);
                 } else {
                   toast({
@@ -129,7 +185,7 @@ const LeaveRequestForm = () => {
             >
               <Send className="h-4 w-4 ml-2" />
               צור הודעה
-            </Button>
+            </Button> */}
             
             <Button type="submit">
               <Save className="h-4 w-4 ml-2" />
@@ -142,7 +198,7 @@ const LeaveRequestForm = () => {
       {generatedMessage && (
         <MessagePreview
           message={generatedMessage}
-          soldierPhone={selectedSoldier?.phone}
+          soldierPhone={selectedSoldier?.phoneNumber}
         />
       )}
     </div>

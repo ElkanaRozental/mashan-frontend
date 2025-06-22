@@ -10,32 +10,32 @@ import ReplacementRequestForm from '@/components/forms/ReplacementRequestForm';
 import LeaveRequestForm from '@/components/forms/LeaveRequestForm';
 
 const NewRequestPage = () => {
-  const [activeTab, setActiveTab] = useState('dayOnly');
+  const [activeTab, setActiveTab] = useState('OneDayWithoutAccommodation');
 
   const requestTypes = [
     {
-      id: 'dayOnly',
+      id: 'OneDayWithoutAccommodation',
       name: 'הצטרפות חד-יומית',
       description: 'הצטרפות לבסיס ליום אחד ללא לינה',
       icon: FileText,
       component: DayOnlyRequestForm
     },
     {
-      id: 'stay',
+      id: 'AccommodationForSeveralDays',
       name: 'הצטרפות עם לינה',
       description: 'הצטרפות לבסיס למספר ימים עם לינה',
       icon: Users,
       component: StayRequestForm
     },
     {
-      id: 'replacement',
+      id: 'AccommodationAndExchangeSoldiers',
       name: 'החלפת חיילים',
       description: 'החלפה בין חייל נכנס לחייל עוזב',
       icon: ArrowRightLeft,
       component: ReplacementRequestForm
     },
     {
-      id: 'leave',
+      id: 'BaseLeaving',
       name: 'עזיבת בסיס',
       description: 'בקשה לעזיבת חייל מהבסיס',
       icon: LogOut,

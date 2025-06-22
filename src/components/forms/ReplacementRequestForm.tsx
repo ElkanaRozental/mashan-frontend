@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -16,6 +15,7 @@ import { useAppStore } from '@/store/useAppStore';
 import SoldierSearch from '@/components/SoldierSearch';
 import MessagePreview from '@/components/MessagePreview';
 import { useToast } from '@/hooks/use-toast';
+import SelectBase from '../ui/selectBase';
 
 const formSchema = z.object({
   incomingArrivalDate: z.date({
@@ -37,7 +37,7 @@ type FormData = z.infer<typeof formSchema>;
 
 const ReplacementRequestForm = () => {
   const [incomingSoldier, setIncomingSoldier] = useState<Soldier | null>(null);
-  const [outgoingSoldier, setOutgoingSoldier] = useState<Soldier | null>(null);
+  const [leavingSoldier, setleavingSoldier] = useState<Soldier | null>(null);
   const [generatedMessage, setGeneratedMessage] = useState<string>('');
   const { addRequest } = useAppStore();
   const { toast } = useToast();
@@ -47,25 +47,25 @@ const ReplacementRequestForm = () => {
   });
 
   const generateMessage = (data: FormData) => {
-    if (!incomingSoldier || !outgoingSoldier) return '';
+    if (!      incomingSoldier || !leavingSoldier) return '';
 
     const message = `בקשה להחלפת חיילים
 
 חייל נכנס:
-שם: ${incomingSoldier.fullName}
-מספר אישי: ${incomingSoldier.militaryId}
-דרגה: ${incomingSoldier.rank}
-מדור: ${incomingSoldier.mador}
-תפקיד: ${incomingSoldier.role}
-טלפון: ${incomingSoldier.phone}
+שם: ${      incomingSoldier.name}
+מספר אישי: ${      incomingSoldier.privateNumber}
+דרגה: ${      incomingSoldier.rank}
+מדור: ${      incomingSoldier.department}
+תפקיד: ${      incomingSoldier.role}
+טלפון: ${      incomingSoldier.phoneNumber}
 
 חייל עוזב:
-שם: ${outgoingSoldier.fullName}
-מספר אישי: ${outgoingSoldier.militaryId}
-דרגה: ${outgoingSoldier.rank}
-מדור: ${outgoingSoldier.mador}
-תפקיד: ${outgoingSoldier.role}
-טלפון: ${outgoingSoldier.phone}
+שם: ${leavingSoldier.name}
+מספר אישי: ${leavingSoldier.privateNumber}
+דרגה: ${leavingSoldier.rank}
+מדור: ${leavingSoldier.department}
+תפקיד: ${leavingSoldier.role}
+טלפון: ${leavingSoldier.phoneNumber}
 
 לוח זמנים:
 החייל הנכנס יגיע: ${format(data.incomingArrivalDate, 'dd/MM/yyyy')}
@@ -78,7 +78,7 @@ const ReplacementRequestForm = () => {
   };
 
   const onSubmit = (data: FormData) => {
-    if (!incomingSoldier || !outgoingSoldier) {
+    if (!      incomingSoldier || !leavingSoldier) {
       toast({
         title: "שגיאה",
         description: "יש לבחור שני חיילים",
@@ -88,15 +88,14 @@ const ReplacementRequestForm = () => {
     }
 
     const message = generateMessage(data);
-    
     addRequest({
-      type: 'replacement',
+      submittingType: 'AccommodationAndExchangeSoldiers',
       incomingSoldier,
-      outgoingSoldier,
-      incomingArrivalDate: data.incomingArrivalDate,
-      incomingLeaveDate: data.incomingLeaveDate,
-      outgoingLeaveDate: data.outgoingLeaveDate,
-      baseName: data.baseName,
+      leavingSoldier,
+      arrivelDate: data.incomingArrivalDate.toISOString(),
+      departureDate: data.incomingLeaveDate.toISOString(),
+      leavingSoldierExitDate: data.outgoingLeaveDate.toISOString(),
+      base: data.baseName,
     });
 
     toast({
@@ -107,7 +106,7 @@ const ReplacementRequestForm = () => {
     // Reset form
     form.reset();
     setIncomingSoldier(null);
-    setOutgoingSoldier(null);
+    setleavingSoldier(null);
     setGeneratedMessage('');
   };
 
@@ -118,7 +117,7 @@ const ReplacementRequestForm = () => {
           <h3 className="text-lg font-semibold mb-4">חייל נכנס</h3>
           <SoldierSearch
             onSelectSoldier={setIncomingSoldier}
-            selectedSoldier={incomingSoldier}
+            selectedSoldier={      incomingSoldier}
             placeholder="בחר חייל נכנס..."
           />
         </div>
@@ -126,8 +125,8 @@ const ReplacementRequestForm = () => {
         <div>
           <h3 className="text-lg font-semibold mb-4">חייל עוזב</h3>
           <SoldierSearch
-            onSelectSoldier={setOutgoingSoldier}
-            selectedSoldier={outgoingSoldier}
+            onSelectSoldier={setleavingSoldier}
+            selectedSoldier={leavingSoldier}
             placeholder="בחר חייל עוזב..."
           />
         </div>
@@ -271,7 +270,7 @@ const ReplacementRequestForm = () => {
                   <FormItem>
                     <FormLabel>שם הבסיס</FormLabel>
                     <FormControl>
-                      <Input placeholder="הכנס שם בסיס" {...field} />
+                      <SelectBase field={field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -281,12 +280,12 @@ const ReplacementRequestForm = () => {
           </div>
 
           <div className="flex gap-2">
-            <Button
+            {/* <Button
               type="button"
               variant="outline"
               onClick={() => {
                 const data = form.getValues();
-                if (incomingSoldier && outgoingSoldier && data.incomingArrivalDate && data.incomingLeaveDate && data.outgoingLeaveDate && data.baseName) {
+                if (      incomingSoldier && leavingSoldier && data.incomingArrivalDate && data.incomingLeaveDate && data.outgoingLeaveDate && data.baseName) {
                   generateMessage(data);
                 } else {
                   toast({
@@ -299,7 +298,7 @@ const ReplacementRequestForm = () => {
             >
               <Send className="h-4 w-4 ml-2" />
               צור הודעה
-            </Button>
+            </Button> */}
             
             <Button type="submit">
               <Save className="h-4 w-4 ml-2" />
@@ -312,7 +311,7 @@ const ReplacementRequestForm = () => {
       {generatedMessage && (
         <MessagePreview
           message={generatedMessage}
-          soldierPhone={incomingSoldier?.phone}
+          soldierPhone={      incomingSoldier?.phoneNumber}
         />
       )}
     </div>
