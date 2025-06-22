@@ -16,6 +16,8 @@ import { useToast } from '@/hooks/use-toast';
 
 const RequestsPage = () => {
   const { submitting, updateRequestStatus } = useAppStore();
+  console.log('submitting', submitting);
+  
   const { toast } = useToast();
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -213,7 +215,7 @@ const uniqueMadars = useMemo(() => {
                       {getRequestTypeText(request.submittingType)}
                     </TableCell>
                     <TableCell>{getSoldierName(request)}</TableCell>
-                    <TableCell>{format(request.createdRequestDate, 'dd/MM/yyyy HH:mm')}</TableCell>
+                    <TableCell>{request.createdRequestDate}</TableCell>
                     <TableCell>{request.submitter}</TableCell>
                     <TableCell>{getStatusBadge(request.isApproved)}</TableCell>
                     <TableCell>
